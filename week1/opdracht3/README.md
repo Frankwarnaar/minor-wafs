@@ -5,6 +5,6 @@
 
 # Disadvantages
 
-+ First load takes longer than normal. The user might load things he/she is not going to need.
++ Bad SEO / hard to have good SEO
 + Javascript is required
 + Easier to hack, while the user can easily inspect structure of a website.
