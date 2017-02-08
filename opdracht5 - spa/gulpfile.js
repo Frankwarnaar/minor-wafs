@@ -32,7 +32,7 @@ gulp.task('watch:js', ['js'], function () {
 	return gulp.watch(config.assetsPath + '/js/*.js', ['js']);
 });
 
-gulp.task('watch:html', ['less'], function () {
+gulp.task('watch:html', function () {
 	return gulp.watch(['*.html']).on('change', browserSync.reload);
 });
 
