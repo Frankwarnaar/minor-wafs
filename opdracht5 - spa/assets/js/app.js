@@ -2,6 +2,7 @@
 'use strict';
 (function() {
     const config = {
+        startRoute: '#start',
         routes: ['#start', '#frontendBestPractices']
     };
 
@@ -14,14 +15,9 @@
     const routes = {
         init: function() {
             const hashLocation = document.location.hash;
+            sections.setActive((hashLocation) ? hashLocation : config.startRoute);
 
             this.handleHashChange();
-
-            if (hashLocation) {
-                sections.setActive(hashLocation);
-            } else {
-                document.getElementById('frontendBestPractices').classList.add('hidden');
-            }
         },
         handleHashChange: () => {
             window.addEventListener('hashchange', (e) => {
@@ -35,13 +31,18 @@
     };
 
     const sections = {
-        setActive: (route) => {
+        setActive: function(route) {
+            this.hideAllSections();
+            this.showSection(route);
+        },
+        hideAllSections: () => {
             const sections = Array.from(document.getElementsByTagName('section'));
 
             sections.forEach(section => {
                 section.classList.add('hidden');
             });
-
+        },
+        showSection: (route) => {
             document.querySelector(route).classList.remove('hidden');
         }
     };
