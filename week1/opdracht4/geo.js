@@ -8,9 +8,9 @@
 *
 *   Copyleft 2012, all wrongs reversed.
 */
+'use strict';
 
 (function() {
-    'use strict';
 
     // Variable declaration
     var lineair = "LINEAIR";
@@ -63,7 +63,7 @@
         debugging.message("GPS is beschikbaar, vraag positie.");
         position.update();
         interval = self.setInterval(position.update, refreshRate);
-        ET.addListener(positionUpdated, _check_locations);
+        ET.addListener(positionUpdated, checkLocations);
     }
 
     var position = {
@@ -80,20 +80,13 @@
         }
     };
 
-    // Callback functie voor het instellen van de huidige positie, vuurt een event af
-    function position.set(position){
-        currentPosition = position;
-        ET.fire("positionUpdated");
-        debugging.message(intervalCounter+" positie lat:"+position.coords.latitude+" long:"+position.coords.longitude);
-    }
-
     // Controleer de locaties en verwijs naar een andere pagina als we op een locatie zijn
-    function _check_locations(){
+    function checkLocations(){
         // Liefst buiten google maps om... maar helaas, ze hebben alle coole functies
         for (var i = 0; i < locaties.length; i++) {
             var locatie = {coords:{latitude: locaties[i][3],longitude: locaties[i][4]}};
 
-            if(_calculate_distance(locatie, currentPosition)<locaties[i][2]){
+            if(calcDistance(locatie, currentPosition)<locaties[i][2]){
 
                 // Controle of we NU op die locatie zijn, zo niet gaan we naar de betreffende page
                 if(window.location!=locaties[i][1] && localStorage[locaties[i][0]]=="false"){
@@ -114,7 +107,7 @@
     }
 
     // Bereken het verchil in meters tussen twee punten
-    function _calculate_distance(p1, p2){
+    function calcDistance(p1, p2){
         var pos1 = new google.maps.LatLng(p1.coords.latitude, p1.coords.longitude);
         var pos2 = new google.maps.LatLng(p2.coords.latitude, p2.coords.longitude);
         return Math.round(google.maps.geometry.spherical.computeDistanceBetween(pos1, pos2), 0);
@@ -191,7 +184,7 @@
         });
 
         // Zorg dat de kaart geupdated wordt als het positionUpdated event afgevuurd wordt
-        ET.addListener(positionUpdated, update_positie);
+        ET.addListener(positionUpdated, updatePositie);
     }
 
     function isNumber(n) {
@@ -199,7 +192,7 @@
     }
 
     // Update de positie van de gebruiker op de kaart
-    function update_positie(){
+    function updatePositie(){
         // use currentPosition to center the map
         var newPos = new google.maps.LatLng(currentPosition.coords.latitude, currentPosition.coords.longitude);
         map.setCenter(newPos);
