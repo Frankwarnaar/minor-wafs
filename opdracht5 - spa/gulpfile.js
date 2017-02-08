@@ -10,7 +10,7 @@ var babel       = require('gulp-babel'),
 	Main tasks
    ============================================================ */
 
-gulp.task('default', ['watch-less', 'watch-js', 'browser-sync']);
+gulp.task('default', ['watch', 'browser-sync']);
 
 /* ============================================================
 	Configuration
@@ -22,12 +22,18 @@ var config = {
 	debug: true
 };
 
-gulp.task('watch-less', ['less'], function () {
+gulp.task('watch', ['watch:html', 'watch:js', 'watch:less']);
+
+gulp.task('watch:less', ['less'], function () {
 	return gulp.watch(config.assetsPath + '/styles/**/*.less', ['less']);
 });
 
-gulp.task('watch-js', ['js'], function () {
-	return gulp.watch(config.assetsPath + '/styles/**/*.less', ['less']);
+gulp.task('watch:js', ['js'], function () {
+	return gulp.watch(config.assetsPath + '/js/*.js', ['js']);
+});
+
+gulp.task('watch:html', ['less'], function () {
+	return gulp.watch(['*.html']).on('change', browserSync.reload);
 });
 
 var handleError = function(err) {
@@ -73,14 +79,4 @@ gulp.task('browser-sync', function() {
 			baseDir: "./"
 		}
 	});
-});
-
-/* ============================================================
-	Image compression
-   ============================================================ */
-
-gulp.task('images', function () {
-  gulp.src(config.assetsPath + '/img/**/*')
-	.pipe(image())
-	.pipe(gulp.dest(config.distPath + '/img'));
 });
