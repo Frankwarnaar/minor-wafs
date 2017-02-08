@@ -1,0 +1,19 @@
+button {
+	&:extend(.font-size-md);
+	padding: 0 .5rem;
+
+	height: @btn-height;
+	line-height: @btn-height;
+
+	border: none;
+	background: @color-primary;
+
+	font-weight: @font-weight-regular;
+	color: @color-lightest;
+	cursor: pointer;
+	transition: @transition-fastest;
+
+	&:hover {
+		background: @color-primary-darker;
+	}
+}
