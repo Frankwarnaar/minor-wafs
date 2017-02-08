@@ -6,6 +6,7 @@
     var app = {
         init: function init() {
             routes.init();
+            document.getElementById('frontendBestPractices').classList.add('hidden');
         }
     };
 
