@@ -1,5 +1,5 @@
-'use strict';
 /*jshint esversion: 6 */
+'use strict';
 (function() {
 
     const app = {
