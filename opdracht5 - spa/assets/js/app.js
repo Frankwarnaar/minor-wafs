@@ -20,7 +20,7 @@
             this.handleHashChange();
         },
         handleHashChange: () => {
-            window.addEventListener('hashchange', (e) => {
+            window.addEventListener('hashchange', () => {
                 const hashLocation = document.location.hash;
 
                 if ((config.routes).includes(hashLocation)) {

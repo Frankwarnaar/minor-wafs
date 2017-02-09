@@ -21,7 +21,7 @@
             this.handleHashChange();
         },
         handleHashChange: function handleHashChange() {
-            window.addEventListener('hashchange', function (e) {
+            window.addEventListener('hashchange', function () {
                 var hashLocation = document.location.hash;
 
                 if (config.routes.includes(hashLocation)) {
