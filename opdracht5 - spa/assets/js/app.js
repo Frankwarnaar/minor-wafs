@@ -32,18 +32,14 @@
 
     const sections = {
         setActive: function(route) {
-            this.hideAllSections();
-            this.showSection(route);
-        },
-        hideAllSections: () => {
             const sections = Array.from(document.getElementsByTagName('section'));
-
             sections.forEach(section => {
-                section.classList.add('hidden');
+                if (`#${section.getAttribute('id')}` === route) {
+                    section.classList.remove('hidden');
+                } else {
+                    section.classList.add('hidden');
+                }
             });
-        },
-        showSection: (route) => {
-            document.querySelector(route).classList.remove('hidden');
         }
     };
 

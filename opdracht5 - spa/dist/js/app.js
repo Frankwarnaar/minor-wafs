@@ -33,18 +33,14 @@
 
     var sections = {
         setActive: function setActive(route) {
-            this.hideAllSections();
-            this.showSection(route);
-        },
-        hideAllSections: function hideAllSections() {
             var sections = Array.from(document.getElementsByTagName('section'));
-
             sections.forEach(function (section) {
-                section.classList.add('hidden');
+                if ('#' + section.getAttribute('id') === route) {
+                    section.classList.remove('hidden');
+                } else {
+                    section.classList.add('hidden');
+                }
             });
-        },
-        showSection: function showSection(route) {
-            document.querySelector(route).classList.remove('hidden');
         }
     };
 
