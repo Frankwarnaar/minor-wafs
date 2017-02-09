@@ -17,9 +17,9 @@
             const hashLocation = document.location.hash;
 
             if (hashLocation && (config.routes).includes(hashLocation)) {
-                section.setActive(hashLocation)
+                sections.setActive(hashLocation);
             } else {
-                sections.setActive(config.startRoute));
+                sections.setActive(config.startRoute);
             }
 
             this.handleHashChange();
