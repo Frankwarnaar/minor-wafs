@@ -15,7 +15,12 @@
     const routes = {
         init: function() {
             const hashLocation = document.location.hash;
-            sections.setActive((hashLocation) ? hashLocation : config.startRoute);
+
+            if (hashLocation && (config.routes).includes(hashLocation)) {
+                section.setActive(hashLocation)
+            } else {
+                sections.setActive(config.startRoute));
+            }
 
             this.handleHashChange();
         },
