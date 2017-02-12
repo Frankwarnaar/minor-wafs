@@ -1,4 +1,4 @@
-nav {
+header {
 	&:extend(.flex);
 	&:extend(.flex--row);
 	padding: 0 1rem;
@@ -10,19 +10,21 @@ nav {
 		display: inline-block;
 	}
 
-	> ul {
-		&:extend(.flex);
-		&:extend(.flex--row);
+	nav {
+		> ul {
+			&:extend(.flex);
+			&:extend(.flex--row);
 
-		list-style-type: none;
-	}
+			list-style-type: none;
+		}
 
-	li {
-		padding: .5rem;
-	}
+		li {
+			padding: .5rem;
+		}
 
-	a {
-		text-decoration: none;
-		font-weight: @font-weight-regular;
+		a {
+			text-decoration: none;
+			font-weight: @font-weight-regular;
+		}
 	}
 }

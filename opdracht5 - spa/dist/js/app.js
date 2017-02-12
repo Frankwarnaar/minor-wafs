@@ -1,7 +1,9 @@
-/*jshint esversion: 6 */
 'use strict';
 
+/*jshint esversion: 6 */
 (function () {
+    'use strict';
+
     var config = {
         startRoute: '#start',
         routes: ['#start', '#frontendBestPractices']

@@ -1,13 +1,13 @@
 /*jshint esversion: 6 */
-'use strict';
 (function() {
+    'use strict';
     const config = {
         startRoute: '#start',
         routes: ['#start', '#frontendBestPractices']
     };
 
     const app = {
-        init: () => {
+        init: function() {
             routes.init();
         }
     };
@@ -24,7 +24,7 @@
 
             this.handleHashChange();
         },
-        handleHashChange: () => {
+        handleHashChange: function() {
             window.addEventListener('hashchange', () => {
                 const hashLocation = document.location.hash;
 
