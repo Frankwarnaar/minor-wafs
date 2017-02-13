@@ -7,13 +7,13 @@
     };
 
     const app = {
-        init: function() {
+        init() {
             routes.init();
         }
     };
 
     const routes = {
-        init: function() {
+        init() {
             const hashLocation = document.location.hash;
 
             if (hashLocation && (config.routes).includes(hashLocation)) {
@@ -24,7 +24,7 @@
 
             this.handleHashChange();
         },
-        handleHashChange: function() {
+        handleHashChange() {
             window.addEventListener('hashchange', () => {
                 const hashLocation = document.location.hash;
 
@@ -36,7 +36,7 @@
     };
 
     const sections = {
-        setActive: function(route) {
+        setActive(route) {
             const sections = Array.from(document.getElementsByTagName('section'));
             sections.forEach(section => {
                 if (`#${section.getAttribute('id')}` === route) {
