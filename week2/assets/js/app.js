@@ -3,13 +3,7 @@
     'use strict';
 
     const config = {
-        api: {
-            url: 'https://api.spotify.com/v1/search',
-        },
-        search: {
-            form: document.getElementsByTagName('form')[0],
-            input: document.querySelector('input[type=search]')
-        }
+        apiUrl: 'https://api.spotify.com/v1/search',
     };
 
     const app = {
@@ -20,14 +14,15 @@
 
     const search = {
         init() {
-            config.search.form.addEventListener('submit', this.handle);
+            const form = document.getElementsByTagName('form')[0];
+            form.addEventListener('submit', this.handle);
         },
         handle(e) {
             // Prevent browser from refreshing
             e.preventDefault();
 
-            const searchQuery = config.search.input.value;
-            const requestUrl = `${config.api.url}?q=${searchQuery}&type=track,artist`;
+            const searchQuery = document.querySelector('input[type=search]').value;
+            const requestUrl = `${config.apiUrl}?q=${searchQuery}&type=track,artist`;
             const request = new XMLHttpRequest();
 
             request.open('GET', requestUrl, true);
@@ -57,35 +52,49 @@
                     name: artist.name,
                     images: artist.images,
                 };
-            });
+            }).slice(0,10);
             return artists;
         },
         tracks(tracks) {
-            tracks = tracks.map(track => {
+            return tracks.map(track => {
                 return {
                     id: track.id,
                     name: track.name,
                     artists: this.getArtistsNamesOfTrack(track.artists),
                     images: track.album.images
                 };
-            });
-            return tracks;
+            }).slice(0,10);
         },
         getArtistsNamesOfTrack(artists) {
-            artists = artists.map(artist => {
+            return artists.map(artist => {
                 return {
                     id: artist.id,
                     name: artist.name
                 };
             });
-            return artists;
         }
     };
 
     const view = {
+        elements: {
+            artistsList: document.getElementById('artists'),
+            tracksList: document.getElementById('tracks')
+        },
         render(artists, tracks) {
             console.log(artists);
-            console.log(tracks);
+            this.clear();
+            artists.map(artist => {
+                const listItem = document.createElement('li');
+                const itemContent = `
+                    <img src="${artist.images[0] ? artist.images[0].url : './dist/img/placeholder/band.png'}" alt="${artist.name}"/>
+                    <h3>${artist.name}</h3>
+                `;
+                listItem.innerHTML = itemContent;
+                this.elements.artistsList.appendChild(listItem);
+            });
+        },
+        clear() {
+            this.elements.artistsList.innerHTML = '';
         }
     };
 

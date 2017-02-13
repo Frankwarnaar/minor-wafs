@@ -2,6 +2,7 @@ var babel       = require('gulp-babel'),
 	browserSync = require('browser-sync'),
 	gulp        = require('gulp'),
 	gutil       = require('gulp-util'),
+	image       = require('gulp-image'),
 	less        = require('gulp-less'),
 	plumber     = require('gulp-plumber'),
 	watch       = require('gulp-watch');
@@ -79,4 +80,14 @@ gulp.task('browser-sync', function() {
 			baseDir: "./"
 		}
 	});
+});
+
+/* ============================================================
+	Image compression
+   ============================================================ */
+
+gulp.task('images', function () {
+  gulp.src(config.assetsPath + '/img/**/*')
+	.pipe(image())
+	.pipe(gulp.dest(config.distPath + '/img'));
 });
