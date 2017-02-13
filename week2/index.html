@@ -3,27 +3,39 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width">
-	<title>Google fonts</title>
+	<title>SPA</title>
 	<link href="./dist/css/app.css" rel="stylesheet" type="text/css"/>
 	<script src="./dist/js/routie.min.js" type="text/javascript"></script>
 	<script src="./dist/js/app.js" type="text/javascript" defer></script>
 </head>
 <body>
 	<header>
-		<h1>Spotify finder</h1>
+		<h1>SPA</h1>
+		<nav>
+			<ul>
+				<li><a href="#start" data-route="#start">Startscherm</a></li>
+				<li><a href="#spotify-search" data-route="#spotify-search">Search Spotify</a></li>
+			</ul>
+		</nav>
 	</header>
-	<form>
-		<label>Search Spotify on track or artist
-			<input type="search"/ id="search"/>
-		</label>
-	</form>
-	<section>
-		<h2>Artists</h2>
-		<ul id="artists"></ul>
+	<section id="start" data-page="start">
+		<h2>Hello!</h2>
+		<p>Welcome to my single page app</p>
 	</section>
-	<section>
-		<h2>Tracks</h2>
-		<ul id="tracks"></ul>
+	<section id="spotify-search" data-page="spotify-search">
+		<form>
+			<label>Search Spotify on track or artist
+				<input type="search"/ id="search"/>
+			</label>
+		</form>
+		<section data-results-list class="hidden">
+			<h2>Tracks</h2>
+			<ul id="tracks"></ul>
+		</section>
+		<section data-results-list class="hidden">
+			<h2>Artists</h2>
+			<ul id="artists"></ul>
+		</section>
 	</section>
 </body>
 

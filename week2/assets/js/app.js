@@ -1,14 +1,55 @@
 /*jshint esversion: 6 */
 (function() {
     'use strict';
-
     const config = {
-        apiUrl: 'https://api.spotify.com/v1/search',
+        startRoute: '#start',
+        routes: (function(){
+            const pages = Array.from(document.querySelectorAll('[data-route]'));
+            return pages.map(section => section.getAttribute('data-route'));
+        }()),
+        apiUrl: 'https://api.spotify.com/v1/search'
     };
 
     const app = {
         init() {
+            routes.init();
             search.init();
+        }
+    };
+
+    const routes = {
+        init() {
+            const hashLocation = document.location.hash;
+
+            if (hashLocation && (config.routes).includes(hashLocation)) {
+                pages.setActive(hashLocation);
+            } else {
+                pages.setActive(config.startRoute);
+            }
+
+            this.handleHashChange();
+        },
+        handleHashChange() {
+            window.addEventListener('hashchange', () => {
+                const hashLocation = document.location.hash;
+
+                if ((config.routes).includes(hashLocation)) {
+                    pages.setActive(hashLocation);
+                }
+            });
+        }
+    };
+
+    const pages = {
+        setActive(route) {
+            const pages = Array.from(document.querySelectorAll('[data-page]'));
+            pages.forEach(page => {
+                if (`#${page.getAttribute('id')}` === route) {
+                    page.classList.remove('hidden');
+                } else {
+                    page.classList.add('hidden');
+                }
+            });
         }
     };
 
@@ -52,7 +93,7 @@
                     name: artist.name,
                     images: artist.images,
                 };
-            }).slice(0,10);
+            }).slice(0,3);
             return artists;
         },
         tracks(tracks) {
@@ -63,7 +104,7 @@
                     artists: this.getArtistsNamesOfTrack(track.artists),
                     images: track.album.images
                 };
-            }).slice(0,10);
+            }).slice(0,3);
         },
         getArtistsNamesOfTrack(artists) {
             return artists.map(artist => {
@@ -78,23 +119,39 @@
     const view = {
         elements: {
             artistsList: document.getElementById('artists'),
-            tracksList: document.getElementById('tracks')
+            trackList: document.getElementById('tracks')
         },
         render(artists, tracks) {
-            console.log(artists);
-            this.clear();
+            const lists = Array.from(document.querySelectorAll('[data-results-list]'));
+            this.clearElement(this.elements.artistsList);
+            this.clearElement(this.elements.trackList);
+
             artists.map(artist => {
                 const listItem = document.createElement('li');
                 const itemContent = `
                     <img src="${artist.images[0] ? artist.images[0].url : './dist/img/placeholder/band.png'}" alt="${artist.name}"/>
-                    <h3>${artist.name}</h3>
+                    <strong>${artist.name}</strong>
                 `;
                 listItem.innerHTML = itemContent;
                 this.elements.artistsList.appendChild(listItem);
             });
+
+            tracks.map(track => {
+                const listItem = document.createElement('li');
+                const itemContent = track => {
+                    return `
+                        <iframe src="https://embed.spotify.com/?uri=spotify:track:${track.id}&view=coverart" frameborder="0"></iframe>
+                    `;
+                };
+
+                listItem.innerHTML = itemContent(track);
+                this.elements.trackList.appendChild(listItem);
+            });
+
+            lists.map(list => list.classList.remove('hidden'));
         },
-        clear() {
-            this.elements.artistsList.innerHTML = '';
+        clearElement(element) {
+            element.innerHTML = '';
         }
     };
 

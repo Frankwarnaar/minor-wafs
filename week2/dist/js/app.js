@@ -5,12 +5,56 @@
     'use strict';
 
     var config = {
+        startRoute: '#start',
+        routes: function () {
+            var pages = Array.from(document.querySelectorAll('[data-route]'));
+            return pages.map(function (section) {
+                return section.getAttribute('data-route');
+            });
+        }(),
         apiUrl: 'https://api.spotify.com/v1/search'
     };
 
     var app = {
         init: function init() {
+            routes.init();
             search.init();
+        }
+    };
+
+    var routes = {
+        init: function init() {
+            var hashLocation = document.location.hash;
+
+            if (hashLocation && config.routes.includes(hashLocation)) {
+                pages.setActive(hashLocation);
+            } else {
+                pages.setActive(config.startRoute);
+            }
+
+            this.handleHashChange();
+        },
+        handleHashChange: function handleHashChange() {
+            window.addEventListener('hashchange', function () {
+                var hashLocation = document.location.hash;
+
+                if (config.routes.includes(hashLocation)) {
+                    pages.setActive(hashLocation);
+                }
+            });
+        }
+    };
+
+    var pages = {
+        setActive: function setActive(route) {
+            var pages = Array.from(document.querySelectorAll('[data-page]'));
+            pages.forEach(function (page) {
+                if ('#' + page.getAttribute('id') === route) {
+                    page.classList.remove('hidden');
+                } else {
+                    page.classList.add('hidden');
+                }
+            });
         }
     };
 
@@ -54,7 +98,7 @@
                     name: artist.name,
                     images: artist.images
                 };
-            }).slice(0, 10);
+            }).slice(0, 3);
             return _artists;
         },
         tracks: function tracks(_tracks) {
@@ -67,7 +111,7 @@
                     artists: _this.getArtistsNamesOfTrack(track.artists),
                     images: track.album.images
                 };
-            }).slice(0, 10);
+            }).slice(0, 3);
         },
         getArtistsNamesOfTrack: function getArtistsNamesOfTrack(artists) {
             return artists.map(function (artist) {
@@ -82,22 +126,38 @@
     var view = {
         elements: {
             artistsList: document.getElementById('artists'),
-            tracksList: document.getElementById('tracks')
+            trackList: document.getElementById('tracks')
         },
         render: function render(artists, tracks) {
             var _this2 = this;
 
-            console.log(artists);
-            this.clear();
+            var lists = Array.from(document.querySelectorAll('[data-results-list]'));
+            this.clearElement(this.elements.artistsList);
+            this.clearElement(this.elements.trackList);
+
             artists.map(function (artist) {
                 var listItem = document.createElement('li');
-                var itemContent = '\n                    <img src="' + (artist.images[0] ? artist.images[0].url : './dist/img/placeholder/band.png') + '" alt="' + artist.name + '"/>\n                    <h3>' + artist.name + '</h3>\n                ';
+                var itemContent = '\n                    <img src="' + (artist.images[0] ? artist.images[0].url : './dist/img/placeholder/band.png') + '" alt="' + artist.name + '"/>\n                    <strong>' + artist.name + '</strong>\n                ';
                 listItem.innerHTML = itemContent;
                 _this2.elements.artistsList.appendChild(listItem);
             });
+
+            tracks.map(function (track) {
+                var listItem = document.createElement('li');
+                var itemContent = function itemContent(track) {
+                    return '\n                        <iframe src="https://embed.spotify.com/?uri=spotify:track:' + track.id + '&view=coverart" frameborder="0"></iframe>\n                    ';
+                };
+
+                listItem.innerHTML = itemContent(track);
+                _this2.elements.trackList.appendChild(listItem);
+            });
+
+            lists.map(function (list) {
+                return list.classList.remove('hidden');
+            });
         },
-        clear: function clear() {
-            this.elements.artistsList.innerHTML = '';
+        clearElement: function clearElement(element) {
+            element.innerHTML = '';
         }
     };
 
