@@ -24,12 +24,19 @@
                     page.classList.add('hidden');
                 }
             });
+        },
+        showDetail(data) {
+
         }
     };
 
     routie({
-        'spotify-search'() {
-            pages.setActive('#spotify-search');
+        'spotify'() {
+            pages.setActive('#spotify');
+        },
+        'spotify/:trackId'(trackId) {
+            pages.setActive('#spotify-detail');
+            pages.showDetail();
         },
         '*'() {
             pages.setActive(`#${config.routes.start}`);
@@ -39,14 +46,22 @@
     const search = {
         init() {
             const form = document.getElementsByTagName('form')[0];
-            form.addEventListener('submit', this.handle);
+            form.addEventListener('submit', this.onSearch);
         },
-        handle(e) {
-            // Prevent browser from refreshing
+        onSearch(e) {
             e.preventDefault();
 
-            const searchQuery = document.querySelector('input[type=search]').value;
-            const requestUrl = `${config.apiUrl}?q=${searchQuery}&type=track,artist`;
+            const searchQuery = (document.querySelector('input[type=search]').value ? document.querySelector('input[type=search]').value : ' ');
+
+            connection.handle(`${config.apiUrl}?q=${searchQuery}&type=track`, data => {
+                const tracks = cleanLists.tracks(data.tracks.items);
+                view.render(tracks);
+            });
+        }
+    };
+
+    const connection = {
+        handle(requestUrl, callback) {
             const request = new XMLHttpRequest();
 
             request.open('GET', requestUrl, true);
@@ -54,7 +69,7 @@
             request.onload = () => {
                 if (request.status >= 200 && request.status < 400) {
                     const data = JSON.parse(request.responseText);
-                    view.render(cleanLists.artists(data.artists.items), cleanLists.tracks(data.tracks.items));
+                    callback(data);
                 } else {
                     console.log('error');
                 }
@@ -69,16 +84,6 @@
     };
 
     const cleanLists = {
-        artists(artists) {
-            artists = artists.map(artist => {
-                return {
-                    id: artist.id,
-                    name: artist.name,
-                    images: artist.images,
-                };
-            }).slice(0,3);
-            return artists;
-        },
         tracks(tracks) {
             return tracks.map(track => {
                 return {
@@ -100,38 +105,28 @@
     };
 
     const view = {
-        elements: {
-            artistsList: document.getElementById('artists'),
-            trackList: document.getElementById('tracks')
-        },
-        render(artists, tracks) {
-            const lists = Array.from(document.querySelectorAll('[data-results-list]'));
-            this.clearElement(this.elements.artistsList);
-            this.clearElement(this.elements.trackList);
+        render(tracks) {
+            console.log(tracks);
+            const tracklist = document.getElementById('tracklist');
+            const resultsSections = document.querySelector('[data-results-section]');
 
-            artists.map(artist => {
-                const listItem = document.createElement('li');
-                const itemContent = `
-                    <img src="${artist.images[0] ? artist.images[0].url : './dist/img/placeholder/band.png'}" alt="${artist.name}"/>
-                    <strong>${artist.name}</strong>
-                `;
-                listItem.innerHTML = itemContent;
-                this.elements.artistsList.appendChild(listItem);
-            });
+            this.clearElement(tracklist);
 
             tracks.map(track => {
                 const listItem = document.createElement('li');
                 const itemContent = track => {
                     return `
-                        <iframe src="https://embed.spotify.com/?uri=spotify:track:${track.id}&view=coverart" frameborder="0"></iframe>
+                        <a href="#spotify/${track.id}">
+                            <iframe src="https://embed.spotify.com/?uri=spotify:track:${track.id}&view=coverart" frameborder="0"></iframe>
+                        </a>
                     `;
                 };
 
                 listItem.innerHTML = itemContent(track);
-                this.elements.trackList.appendChild(listItem);
+                tracklist.appendChild(listItem);
             });
 
-            lists.map(list => list.classList.remove('hidden'));
+            resultsSections.classList.remove('hidden');
         },
         clearElement(element) {
             element.innerHTML = '';

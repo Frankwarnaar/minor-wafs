@@ -5,9 +5,19 @@ ul {
 
 	li {
 		padding: .5rem 0;
-		display: flex;
-		flex-direction: row;
-		vertical-align: middle;
+	}
+
+	li.link {
+		position: relative;
+
+		a {
+			position: absolute;
+			top: 0;
+			left: 0;
+
+			width: 100%;
+			height: 100%;
+		}
 	}
 
 	strong {
