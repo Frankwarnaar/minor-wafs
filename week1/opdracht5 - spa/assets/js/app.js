@@ -3,8 +3,13 @@
     'use strict';
     const config = {
         startRoute: '#start',
-        routes: ['#start', '#frontendBestPractices']
+        routes: (function(){
+            const sections = Array.from(document.querySelectorAll('[data-route]'));
+            return sections.map(section => section.getAttribute('data-route'));
+        }())
     };
+
+    console.log(config.routes);
 
     const app = {
         init() {

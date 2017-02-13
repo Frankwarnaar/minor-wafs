@@ -6,8 +6,15 @@
 
     var config = {
         startRoute: '#start',
-        routes: ['#start', '#frontendBestPractices']
+        routes: function () {
+            var sections = Array.from(document.querySelectorAll('[data-route]'));
+            return sections.map(function (section) {
+                return section.getAttribute('data-route');
+            });
+        }()
     };
+
+    console.log(config.routes);
 
     var app = {
         init: function init() {
