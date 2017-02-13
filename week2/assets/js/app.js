@@ -2,41 +2,15 @@
 (function() {
     'use strict';
     const config = {
-        startRoute: '#start',
-        routes: (function(){
-            const pages = Array.from(document.querySelectorAll('[data-route]'));
-            return pages.map(section => section.getAttribute('data-route'));
-        }()),
+        routes: {
+            start: `${document.querySelector('[data-route]').getAttribute('data-route')}`
+        },
         apiUrl: 'https://api.spotify.com/v1/search'
     };
 
     const app = {
         init() {
-            routes.init();
             search.init();
-        }
-    };
-
-    const routes = {
-        init() {
-            const hashLocation = document.location.hash;
-
-            if (hashLocation && (config.routes).includes(hashLocation)) {
-                pages.setActive(hashLocation);
-            } else {
-                pages.setActive(config.startRoute);
-            }
-
-            this.handleHashChange();
-        },
-        handleHashChange() {
-            window.addEventListener('hashchange', () => {
-                const hashLocation = document.location.hash;
-
-                if ((config.routes).includes(hashLocation)) {
-                    pages.setActive(hashLocation);
-                }
-            });
         }
     };
 
@@ -52,6 +26,15 @@
             });
         }
     };
+
+    routie({
+        'spotify-search'() {
+            pages.setActive('#spotify-search');
+        },
+        '*'() {
+            pages.setActive(`#${config.routes.start}`);
+        }
+    });
 
     const search = {
         init() {

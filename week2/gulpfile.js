@@ -61,7 +61,7 @@ gulp.task('less', function () {
    ============================================================ */
 
 gulp.task('js', function () {
-	return gulp.src(config.assetsPath + '/js/app.js')
+	return gulp.src(config.assetsPath + '/js/*.js')
 		.pipe(plumber({
 			errorHandler: handleError
 		}))
