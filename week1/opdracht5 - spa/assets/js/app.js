@@ -9,8 +9,6 @@
         }())
     };
 
-    console.log(config.routes);
-
     const app = {
         init() {
             routes.init();

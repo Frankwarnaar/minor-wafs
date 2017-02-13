@@ -14,8 +14,6 @@
         }()
     };
 
-    console.log(config.routes);
-
     var app = {
         init: function init() {
             routes.init();

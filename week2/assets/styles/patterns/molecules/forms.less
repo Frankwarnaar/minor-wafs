@@ -1,0 +1,20 @@
+form {
+	&:extend(.flex);
+	&:extend(.flex--column);
+	padding: .5rem 0;
+
+	a {
+		padding: .5rem 0;
+	}
+}
+
+.form--inline {
+	&:extend(.flex);
+	&:extend(.flex--row);
+
+	input,
+	textarea {
+		width: 100%;
+		height: @btn-height;
+	}
+}

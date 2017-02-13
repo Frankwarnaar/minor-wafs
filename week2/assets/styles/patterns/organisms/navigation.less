@@ -1,0 +1,30 @@
+header {
+	&:extend(.flex);
+	&:extend(.flex--row);
+	padding: 0 1rem;
+
+	justify-content: space-between;
+
+	h1 {
+		margin-top: 0;
+		display: inline-block;
+	}
+
+	nav {
+		> ul {
+			&:extend(.flex);
+			&:extend(.flex--row);
+
+			list-style-type: none;
+		}
+
+		li {
+			padding: .5rem;
+		}
+
+		a {
+			text-decoration: none;
+			font-weight: @font-weight-regular;
+		}
+	}
+}
