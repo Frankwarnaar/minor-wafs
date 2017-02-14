@@ -5,7 +5,7 @@
         routes: {
             start: `${document.querySelector('[data-route]').getAttribute('data-route')}`
         },
-        apiUrl: 'https://api.spotify.com/v1/search'
+        apiUrl: 'https://api.spotify.com/v1'
     };
 
     const app = {
@@ -23,39 +23,6 @@
                 } else {
                     page.classList.add('hidden');
                 }
-            });
-        },
-        showDetail(data) {
-
-        }
-    };
-
-    routie({
-        'spotify'() {
-            pages.setActive('#spotify');
-        },
-        'spotify/:trackId'(trackId) {
-            pages.setActive('#spotify-detail');
-            pages.showDetail();
-        },
-        '*'() {
-            pages.setActive(`#${config.routes.start}`);
-        }
-    });
-
-    const search = {
-        init() {
-            const form = document.getElementsByTagName('form')[0];
-            form.addEventListener('submit', this.onSearch);
-        },
-        onSearch(e) {
-            e.preventDefault();
-
-            const searchQuery = (document.querySelector('input[type=search]').value ? document.querySelector('input[type=search]').value : ' ');
-
-            connection.handle(`${config.apiUrl}?q=${searchQuery}&type=track`, data => {
-                const tracks = cleanLists.tracks(data.tracks.items);
-                view.render(tracks);
             });
         }
     };
@@ -83,6 +50,39 @@
         }
     };
 
+    routie({
+        'tracks'() {
+            pages.setActive('#tracks');
+        },
+        'tracks/:trackId'(trackId) {
+            pages.setActive('#tracks-details');
+            connection.handle(`${config.apiUrl}/tracks/${trackId}`, data => {
+                const details = cleanLists.track(data);
+                render.details(details);
+            });
+        },
+        '*'() {
+            pages.setActive(`#${config.routes.start}`);
+        }
+    });
+
+    const search = {
+        init() {
+            const form = document.getElementsByTagName('form')[0];
+            form.addEventListener('submit', this.onSearch);
+        },
+        onSearch(e) {
+            e.preventDefault();
+
+            const searchQuery = (document.querySelector('input[type=search]').value ? document.querySelector('input[type=search]').value : ' ');
+
+            connection.handle(`${config.apiUrl}/search?q=${searchQuery}&type=track`, data => {
+                const tracks = cleanLists.tracks(data.tracks.items);
+                render.tracks(tracks);
+            });
+        }
+    };
+
     const cleanLists = {
         tracks(tracks) {
             return tracks.map(track => {
@@ -101,22 +101,33 @@
                     name: artist.name
                 };
             });
+        },
+        track(track) {
+            return {
+                artists: this.getArtistsNamesOfTrack(track.artists),
+                id: track.id,
+                name: track.name,
+                // Get the biggest picture available
+                image: track.album.images.sort((a, b) => {
+                    return b.width - a.width;
+                })[0].url
+            };
         }
     };
 
-    const view = {
-        render(tracks) {
-            console.log(tracks);
+    const render = {
+        tracks(tracks) {
             const tracklist = document.getElementById('tracklist');
             const resultsSections = document.querySelector('[data-results-section]');
 
-            this.clearElement(tracklist);
+            this.clear(tracklist);
 
             tracks.map(track => {
                 const listItem = document.createElement('li');
+                listItem.classList.add('track');
                 const itemContent = track => {
                     return `
-                        <a href="#spotify/${track.id}">
+                        <a href="#tracks/${track.id}">
                             <iframe src="https://embed.spotify.com/?uri=spotify:track:${track.id}&view=coverart" frameborder="0"></iframe>
                         </a>
                     `;
@@ -128,7 +139,17 @@
 
             resultsSections.classList.remove('hidden');
         },
-        clearElement(element) {
+        details(track) {
+            const detailsContainer = document.getElementById('tracks-details');
+            this.clear(detailsContainer);
+            detailsContainer.innerHTML = `
+                <img src="${track.image}" alt="${track.name}"/>
+                <h2>${track.name}</h2>
+                <h3>${track.artists}</h3>
+                <iframe src="https://embed.spotify.com/?uri=spotify:track:${track.id}&view=coverart" frameborder="0"></iframe>
+            `;
+        },
+        clear(element) {
             element.innerHTML = '';
         }
     };

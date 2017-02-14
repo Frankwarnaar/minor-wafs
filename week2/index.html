@@ -14,7 +14,7 @@
 		<nav>
 			<ul>
 				<li><a href="#start" data-route="start">Startscherm</a></li>
-				<li><a href="#spotify" data-route="spotify">Search Spotify</a></li>
+				<li><a href="#tracks" data-route="tracks">Search Spotify</a></li>
 			</ul>
 		</nav>
 	</header>
@@ -22,10 +22,10 @@
 		<h2>Hello!</h2>
 		<p>Welcome to my single page app</p>
 	</section>
-	<section id="spotify" data-page="spotify">
+	<section id="tracks" data-page="tracks">
 		<form>
 			<label>Search Spotify on track or artist
-				<input type="search"/ id="search"/>
+				<input type="search" autocomplete="false" id="search"/>
 			</label>
 		</form>
 		<section data-results-section class="hidden">
@@ -33,10 +33,8 @@
 			<ul id="tracklist"></ul>
 		</section>
 	</section>
-	<section id="spotify-detail" data-page="spotify-detail">
-		<img src="./dist/img/placeholders/band.png"/>
-		<h2>Trackname</h2>
-		<h3>Artist</h3>
+	<section id="tracks-details" data-page="tracks-details">
+
 	</section>
 </body>
 

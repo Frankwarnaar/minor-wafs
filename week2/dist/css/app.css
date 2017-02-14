@@ -290,6 +290,9 @@ a:hover,
 a:focus {
   color: #32de70;
 }
+img {
+  max-width: 100%;
+}
 ul {
   padding: 0;
   margin: 0;
@@ -336,6 +339,17 @@ ul img {
 form {
   max-width: 40em;
   margin: 0 auto;
+}
+.track {
+  position: relative;
+}
+.track a:after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 40%;
+  left: 5rem;
 }
 iframe {
   width: 100%;
