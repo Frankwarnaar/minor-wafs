@@ -20,7 +20,15 @@
 @color-secondary-darker:     darken(@color-secondary, 10%);
 @color-secondary-darkest:    darken(@color-secondary, 20%);
 
-@color-highlight-success: #00f787;
-@color-highlight-warning: @color-primary;
-@color-highlight-info:    @color-secondary;
-@color-highlight-error:   #f70039;
+@color-highlight-success:          #00f787;
+@color-highlight-success-lighter:  lighten(@color-highlight-success, 32%);
+@color-highlight-success-lightest: lighten(@color-highlight-success, 42%);
+@color-highlight-warning:          @color-primary;
+@color-highlight-warning-lighter:  lighten(@color-highlight-warning, 32%);
+@color-highlight-warning-lightest: lighten(@color-highlight-warning, 42%);
+@color-highlight-info:             @color-secondary;
+@color-highlight-info-lighter:     lighten(@color-highlight-info, 32%);
+@color-highlight-info-lightest:    lighten(@color-highlight-info, 42%);
+@color-highlight-error:            #f70039;
+@color-highlight-error-lighter:    lighten(@color-highlight-error, 32%);
+@color-highlight-error-lightest:   lighten(@color-highlight-error, 42%);

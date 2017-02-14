@@ -74,12 +74,13 @@
         onSearch(e) {
             e.preventDefault();
 
-            const searchQuery = (document.querySelector('input[type=search]').value ? document.querySelector('input[type=search]').value : ' ');
-
-            connection.handle(`${config.apiUrl}/search?q=${searchQuery}&type=track`, data => {
-                const tracks = cleanLists.tracks(data.tracks.items);
-                render.tracks(tracks);
-            });
+            const searchQuery = document.querySelector('input[type=search]').value;
+            if (searchQuery.length > 0) {
+                connection.handle(`${config.apiUrl}/search?q=${searchQuery}&type=track`, data => {
+                    const tracks = cleanLists.tracks(data.tracks.items);
+                    render.tracks(tracks);
+                });
+            }
         }
     };
 

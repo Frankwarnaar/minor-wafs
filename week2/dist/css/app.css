@@ -340,6 +340,12 @@ form {
   max-width: 40em;
   margin: 0 auto;
 }
+.form--validate input {
+  transition: background 0.3s ease-in-out;
+}
+.form--validate input:valid {
+  background: #9bffd2;
+}
 .track {
   position: relative;
 }

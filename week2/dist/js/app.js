@@ -77,12 +77,13 @@
         onSearch: function onSearch(e) {
             e.preventDefault();
 
-            var searchQuery = document.querySelector('input[type=search]').value ? document.querySelector('input[type=search]').value : ' ';
-
-            connection.handle(config.apiUrl + '/search?q=' + searchQuery + '&type=track', function (data) {
-                var tracks = cleanLists.tracks(data.tracks.items);
-                render.tracks(tracks);
-            });
+            var searchQuery = document.querySelector('input[type=search]').value;
+            if (searchQuery.length > 0) {
+                connection.handle(config.apiUrl + '/search?q=' + searchQuery + '&type=track', function (data) {
+                    var tracks = cleanLists.tracks(data.tracks.items);
+                    render.tracks(tracks);
+                });
+            }
         }
     };
 
