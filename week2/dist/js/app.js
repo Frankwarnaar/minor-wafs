@@ -94,22 +94,14 @@
                 return {
                     id: track.id,
                     name: track.name,
-                    artists: _this.getArtistsNamesOfTrack(track.artists),
+                    artists: _this.getArtistsString(track.artists),
                     images: track.album.images
                 };
             }).slice(0, 3);
         },
-        getArtistsNamesOfTrack: function getArtistsNamesOfTrack(artists) {
-            return artists.map(function (artist) {
-                return {
-                    id: artist.id,
-                    name: artist.name
-                };
-            });
-        },
         track: function track(_track) {
             return {
-                artists: this.getArtistsNamesOfTrack(_track.artists),
+                artists: this.getArtistsString(_track.artists),
                 id: _track.id,
                 name: _track.name,
                 // Get the biggest picture available
@@ -117,6 +109,15 @@
                     return b.width - a.width;
                 })[0].url
             };
+        },
+        getArtistsString: function getArtistsString(artists) {
+            artists = artists.map(function (artist) {
+                return artist.name;
+            });
+            artists = artists.reduce(function (all, current) {
+                return all + ', ' + current;
+            });
+            return artists;
         }
     };
 
@@ -143,7 +144,7 @@
         details: function details(track) {
             var detailsContainer = document.getElementById('tracks-details');
             this.clear(detailsContainer);
-            detailsContainer.innerHTML = '\n                <img src="' + track.image + '" alt="' + track.name + '"/>\n                <h2>' + track.name + '</h2>\n                <h3>' + track.artists + '</h3>\n                <iframe src="https://embed.spotify.com/?uri=spotify:track:' + track.id + '&view=coverart" frameborder="0"></iframe>\n            ';
+            detailsContainer.innerHTML = '\n                <img src="' + track.image + '" alt="' + track.name + '"/>\n                <h2>' + track.name + '</h2>\n                <span>by: </span><h3>' + track.artists + '</h3>\n                <iframe src="https://embed.spotify.com/?uri=spotify:track:' + track.id + '&view=coverart" frameborder="0"></iframe>\n            ';
         },
         clear: function clear(element) {
             element.innerHTML = '';

@@ -89,22 +89,14 @@
                 return {
                     id: track.id,
                     name: track.name,
-                    artists: this.getArtistsNamesOfTrack(track.artists),
+                    artists: this.getArtistsString(track.artists),
                     images: track.album.images
                 };
             }).slice(0,3);
         },
-        getArtistsNamesOfTrack(artists) {
-            return artists.map(artist => {
-                return {
-                    id: artist.id,
-                    name: artist.name
-                };
-            });
-        },
         track(track) {
             return {
-                artists: this.getArtistsNamesOfTrack(track.artists),
+                artists: this.getArtistsString(track.artists),
                 id: track.id,
                 name: track.name,
                 // Get the biggest picture available
@@ -112,6 +104,15 @@
                     return b.width - a.width;
                 })[0].url
             };
+        },
+        getArtistsString(artists) {
+            artists = artists.map(artist => {
+                return artist.name;
+            });
+            artists = artists.reduce((all, current) => {
+                return `${all}, ${current}`;
+            });
+            return artists;
         }
     };
 
@@ -145,7 +146,7 @@
             detailsContainer.innerHTML = `
                 <img src="${track.image}" alt="${track.name}"/>
                 <h2>${track.name}</h2>
-                <h3>${track.artists}</h3>
+                <span>by: </span><h3>${track.artists}</h3>
                 <iframe src="https://embed.spotify.com/?uri=spotify:track:${track.id}&view=coverart" frameborder="0"></iframe>
             `;
         },
