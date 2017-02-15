@@ -70,24 +70,6 @@
                 };
                 xhr.send();
             });
-            // const request = new XMLHttpRequest();
-            //
-            // request.open('GET', requestUrl, true);
-            //
-            // request.onload = () => {
-            //     if (request.status >= 200 && request.status < 400) {
-            //         const data = JSON.parse(request.responseText);
-            //         callback(data);
-            //     } else {
-            //         console.log('error');
-            //     }
-            // };
-            //
-            // request.onerror = err => {
-            //     console.log(err);
-            // };
-            //
-            // request.send();
         }
     };
 
