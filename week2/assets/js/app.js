@@ -91,6 +91,8 @@
 
     const cleanLists = {
         tracks(tracks) {
+            tracks = this.filterArray(tracks, 'available_markets', 'NL');
+
             return tracks.map(track => {
                 return {
                     id: track.id,
@@ -111,6 +113,12 @@
                 })[0].url
             };
         },
+        filterArray(list, key, value) {
+            return list.filter(item => {
+                const array = item[key];
+                return array.includes(value);
+            });
+        },
         getArtistsString(artists) {
             artists = artists.map(artist => {
                 return artist.name;
@@ -129,20 +137,24 @@
 
             this.clear(tracklist);
 
-            tracks.map(track => {
-                const listItem = document.createElement('li');
-                listItem.classList.add('track');
-                const itemContent = track => {
-                    return `
+            if (tracks.length) {
+                tracks.map(track => {
+                    const listItem = document.createElement('li');
+                    listItem.classList.add('track');
+                    const itemContent = track => {
+                        return `
                         <a href="#tracks/${track.id}">
-                            <iframe src="https://embed.spotify.com/?uri=spotify:track:${track.id}&view=coverart" frameborder="0"></iframe>
+                        <iframe src="https://embed.spotify.com/?uri=spotify:track:${track.id}&view=coverart" frameborder="0"></iframe>
                         </a>
-                    `;
-                };
+                        `;
+                    };
 
-                listItem.innerHTML = itemContent(track);
-                tracklist.appendChild(listItem);
-            });
+                    listItem.innerHTML = itemContent(track);
+                    tracklist.appendChild(listItem);
+                });
+            } else {
+                tracklist.innerHTML ='<p>No results found<p>';
+            }
 
             resultsSections.classList.remove('hidden');
         },

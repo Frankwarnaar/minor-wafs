@@ -96,6 +96,8 @@
         tracks: function tracks(_tracks) {
             var _this = this;
 
+            _tracks = this.filterArray(_tracks, 'available_markets', 'NL');
+
             return _tracks.map(function (track) {
                 return {
                     id: track.id,
@@ -116,6 +118,12 @@
                 })[0].url
             };
         },
+        filterArray: function filterArray(list, key, value) {
+            return list.filter(function (item) {
+                var array = item[key];
+                return array.includes(value);
+            });
+        },
         getArtistsString: function getArtistsString(artists) {
             artists = artists.map(function (artist) {
                 return artist.name;
@@ -134,16 +142,20 @@
 
             this.clear(tracklist);
 
-            _tracks2.map(function (track) {
-                var listItem = document.createElement('li');
-                listItem.classList.add('track');
-                var itemContent = function itemContent(track) {
-                    return '\n                        <a href="#tracks/' + track.id + '">\n                            <iframe src="https://embed.spotify.com/?uri=spotify:track:' + track.id + '&view=coverart" frameborder="0"></iframe>\n                        </a>\n                    ';
-                };
+            if (_tracks2.length) {
+                _tracks2.map(function (track) {
+                    var listItem = document.createElement('li');
+                    listItem.classList.add('track');
+                    var itemContent = function itemContent(track) {
+                        return '\n                        <a href="#tracks/' + track.id + '">\n                        <iframe src="https://embed.spotify.com/?uri=spotify:track:' + track.id + '&view=coverart" frameborder="0"></iframe>\n                        </a>\n                        ';
+                    };
 
-                listItem.innerHTML = itemContent(track);
-                tracklist.appendChild(listItem);
-            });
+                    listItem.innerHTML = itemContent(track);
+                    tracklist.appendChild(listItem);
+                });
+            } else {
+                tracklist.innerHTML = '<p>No results found<p>';
+            }
 
             resultsSections.classList.remove('hidden');
         },
