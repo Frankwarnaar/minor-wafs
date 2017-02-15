@@ -13,7 +13,28 @@
 
     var app = {
         init: function init() {
+            routes.init();
             search.init();
+        }
+    };
+
+    var routes = {
+        init: function init() {
+            routie({
+                'tracks': function tracks() {
+                    pages.setActive('#tracks');
+                },
+                'tracks/:trackId': function tracksTrackId(trackId) {
+                    pages.setActive('#tracks-details');
+                    connection.handle(config.apiUrl + '/tracks/' + trackId, function (data) {
+                        var details = cleanLists.track(data);
+                        render.details(details);
+                    });
+                },
+                '*': function _() {
+                    pages.setActive('#' + config.routes.start);
+                }
+            });
         }
     };
 
@@ -52,22 +73,6 @@
             request.send();
         }
     };
-
-    routie({
-        'tracks': function tracks() {
-            pages.setActive('#tracks');
-        },
-        'tracks/:trackId': function tracksTrackId(trackId) {
-            pages.setActive('#tracks-details');
-            connection.handle(config.apiUrl + '/tracks/' + trackId, function (data) {
-                var details = cleanLists.track(data);
-                render.details(details);
-            });
-        },
-        '*': function _() {
-            pages.setActive('#' + config.routes.start);
-        }
-    });
 
     var search = {
         init: function init() {

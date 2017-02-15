@@ -10,9 +10,30 @@
 
     const app = {
         init() {
+            routes.init();
             search.init();
         }
     };
+
+    const routes = {
+        init() {
+            routie({
+                'tracks'() {
+                    pages.setActive('#tracks');
+                },
+                'tracks/:trackId'(trackId) {
+                    pages.setActive('#tracks-details');
+                    connection.handle(`${config.apiUrl}/tracks/${trackId}`, data => {
+                        const details = cleanLists.track(data);
+                        render.details(details);
+                    });
+                },
+                '*'() {
+                    pages.setActive(`#${config.routes.start}`);
+                }
+            });
+        }
+    }
 
     const pages = {
         setActive(route) {
@@ -49,22 +70,6 @@
             request.send();
         }
     };
-
-    routie({
-        'tracks'() {
-            pages.setActive('#tracks');
-        },
-        'tracks/:trackId'(trackId) {
-            pages.setActive('#tracks-details');
-            connection.handle(`${config.apiUrl}/tracks/${trackId}`, data => {
-                const details = cleanLists.track(data);
-                render.details(details);
-            });
-        },
-        '*'() {
-            pages.setActive(`#${config.routes.start}`);
-        }
-    });
 
     const search = {
         init() {
