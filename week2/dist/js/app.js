@@ -26,8 +26,8 @@
                 },
                 'tracks/:trackId': function tracksTrackId(trackId) {
                     pages.setActive('#tracks-details');
-                    connection.handle(config.apiUrl + '/tracks/' + trackId, function (data) {
-                        var details = cleanLists.track(data);
+                    connection.handle(config.apiUrl + '/tracks/' + trackId).then(function (details) {
+                        details = cleanLists.track(details);
                         render.details(details);
                     });
                 },
@@ -52,25 +52,42 @@
     };
 
     var connection = {
-        handle: function handle(requestUrl, callback) {
-            var request = new XMLHttpRequest();
+        handle: function handle(requestUrl) {
+            return new Promise(function (resolve, reject) {
+                var xhr = new XMLHttpRequest();
 
-            request.open('GET', requestUrl, true);
+                xhr.open('GET', requestUrl);
 
-            request.onload = function () {
-                if (request.status >= 200 && request.status < 400) {
-                    var data = JSON.parse(request.responseText);
-                    callback(data);
-                } else {
-                    console.log('error');
-                }
-            };
-
-            request.onerror = function (err) {
-                console.log(err);
-            };
-
-            request.send();
+                xhr.onload = function () {
+                    if (this.status >= 200 && this.status < 300) {
+                        resolve(JSON.parse(xhr.responseText));
+                    } else {
+                        reject({ status: this.status, statusText: xhr.statusText });
+                    }
+                };
+                xhr.onerror = function () {
+                    reject({ status: this.status, statusText: xhr.statusText });
+                };
+                xhr.send();
+            });
+            // const request = new XMLHttpRequest();
+            //
+            // request.open('GET', requestUrl, true);
+            //
+            // request.onload = () => {
+            //     if (request.status >= 200 && request.status < 400) {
+            //         const data = JSON.parse(request.responseText);
+            //         callback(data);
+            //     } else {
+            //         console.log('error');
+            //     }
+            // };
+            //
+            // request.onerror = err => {
+            //     console.log(err);
+            // };
+            //
+            // request.send();
         }
     };
 
@@ -84,7 +101,7 @@
 
             var searchQuery = document.querySelector('input[type=search]').value;
             if (searchQuery.length > 0) {
-                connection.handle(config.apiUrl + '/search?q=' + searchQuery + '&type=track', function (data) {
+                connection.handle(config.apiUrl + '/search?q=' + searchQuery + '&type=track').then(function (data) {
                     var tracks = cleanLists.tracks(data.tracks.items);
                     render.tracks(tracks);
                 });

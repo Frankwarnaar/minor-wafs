@@ -23,8 +23,9 @@
                 },
                 'tracks/:trackId'(trackId) {
                     pages.setActive('#tracks-details');
-                    connection.handle(`${config.apiUrl}/tracks/${trackId}`, data => {
-                        const details = cleanLists.track(data);
+                    connection.handle(`${config.apiUrl}/tracks/${trackId}`)
+                    .then(details => {
+                        details = cleanLists.track(details);
                         render.details(details);
                     });
                 },
@@ -49,25 +50,42 @@
     };
 
     const connection = {
-        handle(requestUrl, callback) {
-            const request = new XMLHttpRequest();
+        handle(requestUrl) {
+            return new Promise(function(resolve, reject) {
+                var xhr = new XMLHttpRequest();
 
-            request.open('GET', requestUrl, true);
+                xhr.open('GET', requestUrl);
 
-            request.onload = () => {
-                if (request.status >= 200 && request.status < 400) {
-                    const data = JSON.parse(request.responseText);
-                    callback(data);
-                } else {
-                    console.log('error');
-                }
-            };
-
-            request.onerror = err => {
-                console.log(err);
-            };
-
-            request.send();
+                xhr.onload = function() {
+                    if (this.status >= 200 && this.status < 300) {
+                        resolve(JSON.parse(xhr.responseText));
+                    } else {
+                        reject({status: this.status, statusText: xhr.statusText});
+                    }
+                };
+                xhr.onerror = function() {
+                    reject({status: this.status, statusText: xhr.statusText});
+                };
+                xhr.send();
+            });
+            // const request = new XMLHttpRequest();
+            //
+            // request.open('GET', requestUrl, true);
+            //
+            // request.onload = () => {
+            //     if (request.status >= 200 && request.status < 400) {
+            //         const data = JSON.parse(request.responseText);
+            //         callback(data);
+            //     } else {
+            //         console.log('error');
+            //     }
+            // };
+            //
+            // request.onerror = err => {
+            //     console.log(err);
+            // };
+            //
+            // request.send();
         }
     };
 
@@ -81,7 +99,8 @@
 
             const searchQuery = document.querySelector('input[type=search]').value;
             if (searchQuery.length > 0) {
-                connection.handle(`${config.apiUrl}/search?q=${searchQuery}&type=track`, data => {
+                connection.handle(`${config.apiUrl}/search?q=${searchQuery}&type=track`)
+                .then(data => {
                     const tracks = cleanLists.tracks(data.tracks.items);
                     render.tracks(tracks);
                 });
