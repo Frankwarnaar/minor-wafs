@@ -115,8 +115,7 @@
         },
         filterArray(list, key, value) {
             return list.filter(item => {
-                const array = item[key];
-                return array.includes(value);
+                return item[key].includes(value);
             });
         },
         getArtistsString(artists) {

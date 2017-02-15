@@ -120,8 +120,7 @@
         },
         filterArray: function filterArray(list, key, value) {
             return list.filter(function (item) {
-                var array = item[key];
-                return array.includes(value);
+                return item[key].includes(value);
             });
         },
         getArtistsString: function getArtistsString(artists) {
