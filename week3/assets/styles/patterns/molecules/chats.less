@@ -1,0 +1,27 @@
+.chat {
+	&:extend(.flex);
+	&:extend(.flex--column);
+	padding: .5rem;
+	margin: 1rem 0;
+
+	background: @color-lightest;
+
+	footer {
+		&:extend(.font-size-sm);
+		&:extend(.flex);
+		&:extend(.flex--row);
+
+		flex-wrap: wrap;
+		justify-content: space-between;
+		order: -1;
+
+		font-weight: @font-weight-light;
+		border-bottom: 1px solid @color-primary;
+		vertical-align: middle;
+	}
+}
+
+.chat__message {
+	padding-top: .325rem;
+	font-weight: @font-weight-regular;
+}

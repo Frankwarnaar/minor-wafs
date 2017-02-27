@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width">
+	<title>SPA</title>
+	<link href="./dist/css/app.css" rel="stylesheet" type="text/css"/>
+	<script src="./dist/js/routie.min.js" type="text/javascript"></script>
+	<script src="./dist/js/app.js" type="text/javascript" defer></script>
+</head>
+<body>
+	<header>
+		<h1>SPA</h1>
+		<nav>
+			<ul>
+				<li><a href="#start" data-route="start">Startscherm</a></li>
+				<li><a href="#tracks" data-route="tracks">Search Spotify</a></li>
+			</ul>
+		</nav>
+	</header>
+	<section id="start" data-page="start">
+		<h2>Hello!</h2>
+		<p>Welcome to my single page app</p>
+	</section>
+	<section id="tracks" data-page="tracks">
+		<form class="form--validate">
+			<label>
+				<h2>Search Spotify on track or artist</h2>
+				<input required type="search" autocomplete="off" id="search"/>
+			</label>
+		</form>
+		<section data-results-section class="hidden">
+			<h2>Tracks</h2>
+			<ul id="tracklist"></ul>
+		</section>
+	</section>
+	<section id="tracks-details" data-page="tracks-details"></section>
+</body>
+
+</html>

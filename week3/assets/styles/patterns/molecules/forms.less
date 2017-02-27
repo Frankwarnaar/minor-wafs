@@ -1,0 +1,14 @@
+form {
+	max-width: 40em;
+	margin: 0 auto;
+}
+
+.form--validate {
+	input {
+		transition: background @transition-fast;
+
+		&:valid {
+			background: @color-highlight-success-lighter;
+		}
+	}
+}
