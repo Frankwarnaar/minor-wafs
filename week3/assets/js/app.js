@@ -46,7 +46,6 @@
 				e.preventDefault();
 
 				const searchQuery = document.querySelector('input[type=search]').value;
-				console.log(searchQuery);
 				if (searchQuery.length > 0) {
 					view.render.tracks(searchQuery);
 				}
@@ -76,14 +75,14 @@
 				return {
 					id: track.id,
 					name: track.name,
-					artists: this.getArtistsString(track.artists),
+					artists: this.artistsToString(track.artists),
 					images: track.album.images
 				};
 			}).slice(0,3);
 		},
 		details(track) {
 			return {
-				artists: this.getArtistsString(track.artists),
+				artists: this.artistsToString(track.artists),
 				id: track.id,
 				name: track.name,
 				// Get the biggest picture available
@@ -126,48 +125,55 @@
 				const tracklist = document.getElementById('tracklist');
 				const resultsSections = document.querySelector('[data-results-section]');
 
-				console.log(this);
-
-				// this.clear(tracklist);
+				view.clear(tracklist);
 
 				app.handleConnection(`${app.config.apiUrl}/search?q=${searchQuery}&type=track`)
 				.then(data => {
-					const tracks = cleanLists.tracks(data.tracks.items);
-					render.tracks(tracks);
+					const tracks = cleanData.tracks(data.tracks.items);
+
+					if (tracks.length) {
+						tracks.map(track => {
+							const listItem = document.createElement('li');
+							listItem.classList.add('track');
+							const itemContent = track => {
+								return `
+								<a href="#tracks/${track.id}">
+								<iframe src="https://embed.spotify.com/?uri=spotify:track:${track.id}&view=coverart" frameborder="0"></iframe>
+								</a>
+								`;
+							};
+
+							listItem.innerHTML = itemContent(track);
+							tracklist.appendChild(listItem);
+						});
+					} else {
+						tracklist.innerHTML ='<p>No results found<p>';
+					}
+
+					resultsSections.classList.remove('hidden');
 				});
 
-				// if (tracks.length) {
-				// 	tracks.map(track => {
-				// 		const listItem = document.createElement('li');
-				// 		listItem.classList.add('track');
-				// 		const itemContent = track => {
-				// 			return `
-				// 			<a href="#tracks/${track.id}">
-				// 			<iframe src="https://embed.spotify.com/?uri=spotify:track:${track.id}&view=coverart" frameborder="0"></iframe>
-				// 			</a>
-				// 			`;
-				// 		};
-				//
-				// 		listItem.innerHTML = itemContent(track);
-				// 		tracklist.appendChild(listItem);
-				// 	});
-				// } else {
-				// 	tracklist.innerHTML ='<p>No results found<p>';
-				// }
-				//
-				// resultsSections.classList.remove('hidden');
 
 			},
 			details(trackId) {
 				const detailsContainer = document.getElementById('tracks-details');
-				this.clear(detailsContainer);
-				detailsContainer.innerHTML = `
-					<img src="${track.image}" alt="${track.name}"/>
-					<h2>${track.name}</h2>
-					<span>by: </span><h3>${track.artists}</h3>
-					<iframe src="https://embed.spotify.com/?uri=spotify:track:${track.id}&view=coverart" frameborder="0"></iframe>
-				`;
+				view.clear(detailsContainer);
+
+				app.handleConnection(`${app.config.apiUrl}/tracks/${trackId}`)
+					.then(details => {
+						details = cleanData.details(details);
+
+						detailsContainer.innerHTML = `
+						<img src="${details.image}" alt="${details.name}"/>
+						<h2>${details.name}</h2>
+						<span>by: </span><h3>${details.artists}</h3>
+						<iframe src="https://embed.spotify.com/?uri=spotify:track:${details.id}&view=coverart" frameborder="0"></iframe>
+						`;
+					});
 			}
+		},
+		clear(element) {
+			element.innerHTML = '';
 		}
 	};
 
