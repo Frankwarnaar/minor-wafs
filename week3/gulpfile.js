@@ -65,7 +65,9 @@ gulp.task('js', function () {
 		.pipe(plumber({
 			errorHandler: handleError
 		}))
-		.pipe(babel())
+		.pipe(babel({
+			plugins: ["transform-remove-strict-mode"]
+		}))
 		.pipe(gulp.dest(config.distPath + '/js'))
 		.pipe(browserSync.stream());
 });
