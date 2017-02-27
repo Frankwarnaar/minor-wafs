@@ -5,6 +5,7 @@
 	var app = {
 		init: function init() {
 			controller.init();
+			model.init();
 		},
 
 		// Handles ajax requests as promise.
@@ -54,6 +55,7 @@
 				var searchQuery = document.querySelector('input[type=search]').value;
 				// Make sure the user has searched something. Should always be true, becuase the input is required
 				if (searchQuery.length > 0) {
+					model.searchHistory.update(searchQuery);
 					view.render.tracks(searchQuery);
 				}
 			});
@@ -81,55 +83,75 @@
 		}
 	};
 
-	// Methods to clean data
-	var cleanData = {
-		// Make sure only the used data is returned of a list of tracks
-		tracks: function tracks(_tracks, key, value) {
-			var _this = this;
+	var model = {
+		init: function init() {
+			this.searchHistory.history = [];
+			this.searchHistory.get();
+		},
 
-			_tracks = this.filterArray(_tracks, 'available_markets', 'NL');
+		searchHistory: {
+			get: function get() {
+				if (localStorage.getItem('searchHistory')) {
+					this.history = JSON.parse(localStorage.getItem('searchHistory'));
+				}
+			},
+			update: function update(searchQuery) {
+				var history = this.history;
+				history.unshift(searchQuery);
+				this.searchHistory = history;
+				localStorage.setItem('searchHistory', this.searchHistory);
+			}
+		},
+		// Methods to clean data
+		cleanData: {
+			// Make sure only the used data is returned of a list of tracks
+			tracks: function tracks(_tracks, key, value) {
+				var _this = this;
 
-			return _tracks.map(function (track) {
+				_tracks = this.filterArray(_tracks, 'available_markets', 'NL');
+
+				return _tracks.map(function (track) {
+					return {
+						id: track.id,
+						name: track.name,
+						artists: _this.artistsToString(track.artists),
+						images: track.album.images
+					};
+				});
+			},
+
+			// Make sure only the used data is returned of a single track
+			details: function details(track) {
 				return {
+					artists: this.artistsToString(track.artists),
 					id: track.id,
 					name: track.name,
-					artists: _this.artistsToString(track.artists),
-					images: track.album.images
+					// Get the biggest picture available
+					image: track.album.images.sort(function (a, b) {
+						return b.width - a.width;
+					})[0].url
 				};
-			});
-		},
+			},
 
-		// Make sure only the used data is returned of a single track
-		details: function details(track) {
-			return {
-				artists: this.artistsToString(track.artists),
-				id: track.id,
-				name: track.name,
-				// Get the biggest picture available
-				image: track.album.images.sort(function (a, b) {
-					return b.width - a.width;
-				})[0].url
-			};
-		},
+			// Filter an array, by by a certain property
+			filterArray: function filterArray(list, key, value) {
+				return list.filter(function (item) {
+					return item[key].includes(value);
+				});
+			},
 
-		// Filter an array, by by a certain property
-		filterArray: function filterArray(list, key, value) {
-			return list.filter(function (item) {
-				return item[key].includes(value);
-			});
-		},
+			// Return a string of all the artists from an array
+			artistsToString: function artistsToString(artists) {
+				artists = artists.map(function (artist) {
+					return artist.name;
+				});
 
-		// Return a string of all the artists from an array
-		artistsToString: function artistsToString(artists) {
-			artists = artists.map(function (artist) {
-				return artist.name;
-			});
+				artists = artists.reduce(function (all, current) {
+					return all + ', ' + current;
+				});
 
-			artists = artists.reduce(function (all, current) {
-				return all + ', ' + current;
-			});
-
-			return artists;
+				return artists;
+			}
 		}
 	};
 
@@ -160,7 +182,7 @@
 				view.clear($tracklist);
 
 				app.handleConnection(app.config.apiUrl + '/search?q=' + searchQuery + '&type=track').then(function (data) {
-					var tracks = cleanData.tracks(data.tracks.items).splice(0, 10);
+					var tracks = model.cleanData.tracks(data.tracks.items).splice(0, 10);
 
 					view.showLoader(false);
 
@@ -201,7 +223,7 @@
 				app.handleConnection(app.config.apiUrl + '/tracks/' + trackId).then(function (details) {
 					view.showLoader(true);
 
-					details = cleanData.details(details);
+					details = model.cleanData.details(details);
 
 					var content = '\n\t\t\t\t\t\t<img src="' + details.image + '" alt="' + details.name + '"/>\n\t\t\t\t\t\t<h2>' + details.name + '</h2>\n\t\t\t\t\t\t<span>by: </span><h3>' + details.artists + '</h3>\n\t\t\t\t\t\t';
 
