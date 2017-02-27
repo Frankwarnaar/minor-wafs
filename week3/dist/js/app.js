@@ -126,6 +126,8 @@
 
 		render: {
 			tracks: function tracks(searchQuery) {
+				var _this2 = this;
+
 				var $tracklist = document.getElementById('tracklist');
 				var $resultsSections = document.querySelector('[data-results-section]');
 
@@ -141,61 +143,71 @@
 
 					if (tracks.length) {
 						tracks.map(function (track) {
-							var listItem = document.createElement('li');
-							listItem.classList.add('track');
-							var itemContent = function itemContent(track) {
-								return '\n\t\t\t\t\t\t\t\t<a href="#tracks/' + track.id + '">\n\t\t\t\t\t\t\t\t<iframe src="https://embed.spotify.com/?uri=spotify:track:' + track.id + '&view=coverart" frameborder="0"></iframe>\n\t\t\t\t\t\t\t\t</a>\n\t\t\t\t\t\t\t\t';
-							};
+							var $content = '\n\t\t\t\t\t\t\t\t<a href="#tracks/' + track.id + '"></a>\n\t\t\t\t\t\t\t';
 
-							listItem.innerHTML = itemContent(track);
-							$tracklist.appendChild(listItem);
+							var $listItem = document.createElement('li');
+							var $trackLink = document.createElement('a');
+
+							$listItem.appendChild($trackLink);
+
+							_this2.content('https://embed.spotify.com/?uri=spotify:track:' + track.id + '&view=coverart" frameborder="0"', null, $trackLink);
+
+							$tracklist.appendChild($listItem);
 						});
 					} else {
 						tracklist.innerHTML = '<p>No results found<p>';
 					}
 				}).catch(function (error) {
 					tracklist.innerHTML = '<p>No results found<p>';
+					console.log(error);
 					view.showLoader(false);
 				});
 			},
 			details: function details(trackId) {
-				var detailsContainer = document.getElementById('tracks-details');
+				var _this3 = this;
 
-				view.clear(detailsContainer);
+				var $detailsContainer = document.getElementById('tracks-details');
+
+				view.clear($detailsContainer);
 				view.showLoader(true);
-
-				console.log(app.config.apiUrl + '/tracks/' + trackId);
 
 				// Get track details
 				app.handleConnection(app.config.apiUrl + '/tracks/' + trackId).then(function (details) {
-					details = cleanData.details(details);
-
 					view.showLoader(true);
 
-					var iframe = document.createElement('iframe');
-					iframe.setAttribute('src', 'https://embed.spotify.com/?uri=spotify:track:' + details.id + '&view=coverart" frameborder="0"');
-					iframe.classList.add('hidden');
+					details = cleanData.details(details);
 
-					var iframePlaceholder = document.createElement('div');
-					iframePlaceholder.classList.add('loader');
+					var content = '\n\t\t\t\t\t\t<img src="' + details.image + '" alt="' + details.name + '"/>\n\t\t\t\t\t\t<h2>' + details.name + '</h2>\n\t\t\t\t\t\t<span>by: </span><h3>' + details.artists + '</h3>\n\t\t\t\t\t\t';
 
-					detailsContainer.innerHTML = '\n\t\t\t\t\t\t<img src="' + details.image + '" alt="' + details.name + '"/>\n\t\t\t\t\t\t<h2>' + details.name + '</h2>\n\t\t\t\t\t\t<span>by: </span><h3>' + details.artists + '</h3>\n\t\t\t\t\t\t';
-
-					detailsContainer.appendChild(iframePlaceholder);
-
-					iframe.addEventListener('load', function () {
-						detailsContainer.removeChild(iframePlaceholder);
-						iframe.classList.remove('hidden');
-					});
-
-					iframePlaceholder.parentNode.insertBefore(iframe, iframePlaceholder.nextSibling);
+					_this3.content('https://embed.spotify.com/?uri=spotify:track:' + details.id + '&view=coverart" frameborder="0"', content, $detailsContainer);
 
 					view.showLoader(false);
 				}).catch(function (error) {
 					console.log(error);
-					detailsContainer.innerHTML = 'We couldn\'t find any details for this track. <a href="#tracks"> Search again</a>';
+					$detailsContainer.innerHTML = 'We couldn\'t find any details for this track. <a href="#tracks"> Search again</a>';
 					view.showLoader(false);
 				});
+			},
+
+			// Fill content with a loader as placeholder for the iframe while loading
+			content: function content(iframeSrc, _content, container) {
+				var $iframe = document.createElement('iframe');
+				$iframe.setAttribute('src', iframeSrc);
+				$iframe.classList.add('hidden');
+
+				var $iframePlaceholder = document.createElement('div');
+				$iframePlaceholder.classList.add('loader');
+
+				container.innerHTML = _content;
+
+				container.appendChild($iframePlaceholder);
+
+				$iframe.addEventListener('load', function () {
+					container.removeChild($iframePlaceholder);
+					$iframe.classList.remove('hidden');
+				});
+
+				container.appendChild($iframe);
 			}
 		},
 		// Clear everything inside an element

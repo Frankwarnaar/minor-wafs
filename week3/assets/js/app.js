@@ -138,71 +138,76 @@
 
 					if (tracks.length) {
 						tracks.map(track => {
-							const listItem = document.createElement('li');
-							listItem.classList.add('track');
-							const itemContent = track => {
-								return `
-								<a href="#tracks/${track.id}">
-								<iframe src="https://embed.spotify.com/?uri=spotify:track:${track.id}&view=coverart" frameborder="0"></iframe>
-								</a>
-								`;
-							};
+							const $content = `
+								<a href="#tracks/${track.id}"></a>
+							`;
 
-							listItem.innerHTML = itemContent(track);
-							$tracklist.appendChild(listItem);
+							const $listItem = document.createElement('li');
+							const $trackLink = document.createElement('a');
+
+							$listItem.appendChild($trackLink);
+
+							this.content(`https://embed.spotify.com/?uri=spotify:track:${track.id}&view=coverart" frameborder="0"`, null, $trackLink);
+
+							$tracklist.appendChild($listItem);
 						});
 					} else {
 						tracklist.innerHTML ='<p>No results found<p>';
 					}
 				}).catch(error => {
 					tracklist.innerHTML ='<p>No results found<p>';
+					console.log(error);
 					view.showLoader(false)
 				});
 			},
 			details(trackId) {
-				const detailsContainer = document.getElementById('tracks-details');
+				const $detailsContainer = document.getElementById('tracks-details');
 
-				view.clear(detailsContainer);
+				view.clear($detailsContainer);
 				view.showLoader(true);
-
-				console.log(`${app.config.apiUrl}/tracks/${trackId}`);
 
 				// Get track details
 				app.handleConnection(`${app.config.apiUrl}/tracks/${trackId}`)
 					.then(details => {
+						view.showLoader(true);
+
 						details = cleanData.details(details);
 
-						view.showLoader(true)
-
-						const iframe = document.createElement('iframe');
-						iframe.setAttribute('src', `https://embed.spotify.com/?uri=spotify:track:${details.id}&view=coverart" frameborder="0"`);
-						iframe.classList.add('hidden');
-
-						const iframePlaceholder = document.createElement('div');
-						iframePlaceholder.classList.add('loader');
-
-						detailsContainer.innerHTML = `
+						const content = `
 						<img src="${details.image}" alt="${details.name}"/>
 						<h2>${details.name}</h2>
 						<span>by: </span><h3>${details.artists}</h3>
 						`;
 
-						detailsContainer.appendChild(iframePlaceholder);
-
-						iframe.addEventListener('load', () => {
-							detailsContainer.removeChild(iframePlaceholder);
-							iframe.classList.remove('hidden');
-						});
-
-						iframePlaceholder.parentNode.insertBefore(iframe, iframePlaceholder.nextSibling);
+						this.content(`https://embed.spotify.com/?uri=spotify:track:${details.id}&view=coverart" frameborder="0"`, content, $detailsContainer)
 
 						view.showLoader(false)
 
 					}).catch(error => {
 						console.log(error);
-						detailsContainer.innerHTML = `We couldn't find any details for this track. <a href="#tracks"> Search again</a>`
+						$detailsContainer.innerHTML = `We couldn't find any details for this track. <a href="#tracks"> Search again</a>`
 						view.showLoader(false)
 					});
+			},
+			// Fill content with a loader as placeholder for the iframe while loading
+			content(iframeSrc, content, container) {
+				const $iframe = document.createElement('iframe');
+				$iframe.setAttribute('src', iframeSrc);
+				$iframe.classList.add('hidden');
+
+				const $iframePlaceholder = document.createElement('div');
+				$iframePlaceholder.classList.add('loader');
+
+				container.innerHTML = content;
+
+				container.appendChild($iframePlaceholder);
+
+				$iframe.addEventListener('load', () => {
+					container.removeChild($iframePlaceholder);
+					$iframe.classList.remove('hidden');
+				});
+
+				container.appendChild($iframe);
 			}
 		},
 		// Clear everything inside an element
