@@ -6,6 +6,8 @@
 		init: function init() {
 			controller.init();
 		},
+
+		// Handles ajax requests as promise.
 		handleConnection: function handleConnection(requestUrl) {
 			return new Promise(function (resolve, reject) {
 				var xhr = new XMLHttpRequest();
@@ -28,6 +30,7 @@
 			});
 		},
 
+		// Config used through the app
 		config: {
 			routes: {
 				start: '' + document.querySelector('[data-route]').getAttribute('data-route')
@@ -41,26 +44,36 @@
 			this.search();
 			this.routes();
 		},
+
+		// Function to handle search
 		search: function search() {
 			var $form = document.getElementsByTagName('form')[0];
 			$form.addEventListener('submit', function (e) {
 				e.preventDefault();
 
 				var searchQuery = document.querySelector('input[type=search]').value;
+				// Make sure the user has searched something. Should always be true, becuase the input is required
 				if (searchQuery.length > 0) {
 					view.render.tracks(searchQuery);
 				}
 			});
 		},
+
+		// Routing
 		routes: function routes() {
 			routie({
+				// Overview page
 				'tracks': function tracks() {
 					view.activatePage('#tracks');
 				},
+
+				// Detail page
 				'tracks/:trackId': function tracksTrackId(trackId) {
 					view.activatePage('#tracks-details');
 					view.render.details(trackId);
 				},
+
+				// Fallback to starting page
 				'*': function _() {
 					view.activatePage('#' + app.config.routes.start);
 				}
@@ -68,7 +81,9 @@
 		}
 	};
 
+	// Methods to clean data
 	var cleanData = {
+		// Make sure only the used data is returned of a list of tracks
 		tracks: function tracks(_tracks, key, value) {
 			var _this = this;
 
@@ -81,8 +96,10 @@
 					artists: _this.artistsToString(track.artists),
 					images: track.album.images
 				};
-			}).slice(0, 3);
+			});
 		},
+
+		// Make sure only the used data is returned of a single track
 		details: function details(track) {
 			return {
 				artists: this.artistsToString(track.artists),
@@ -94,11 +111,15 @@
 				})[0].url
 			};
 		},
+
+		// Filter an array, by by a certain property
 		filterArray: function filterArray(list, key, value) {
 			return list.filter(function (item) {
 				return item[key].includes(value);
 			});
 		},
+
+		// Return a string of all the artists from an array
 		artistsToString: function artistsToString(artists) {
 			artists = artists.map(function (artist) {
 				return artist.name;
@@ -113,6 +134,7 @@
 	};
 
 	var view = {
+		// Make the current page visible and all the other invisible
 		activatePage: function activatePage(route) {
 			var $pages = Array.from(document.querySelectorAll('[data-page]'));
 			$pages.forEach(function ($page) {
@@ -125,6 +147,7 @@
 		},
 
 		render: {
+			// Method to render a list of tracks
 			tracks: function tracks(searchQuery) {
 				var _this2 = this;
 
@@ -137,16 +160,17 @@
 				view.clear($tracklist);
 
 				app.handleConnection(app.config.apiUrl + '/search?q=' + searchQuery + '&type=track').then(function (data) {
-					var tracks = cleanData.tracks(data.tracks.items);
+					var tracks = cleanData.tracks(data.tracks.items).splice(0, 10);
 
 					view.showLoader(false);
 
 					if (tracks.length) {
 						tracks.map(function (track) {
-							var $content = '\n\t\t\t\t\t\t\t\t<a href="#tracks/' + track.id + '"></a>\n\t\t\t\t\t\t\t';
+							var $listItem = document.createElement('li'),
+							    $trackLink = document.createElement('a');
 
-							var $listItem = document.createElement('li');
-							var $trackLink = document.createElement('a');
+							$listItem.classList.add('track');
+							$trackLink.setAttribute('href', '#tracks/' + track.id);
 
 							$listItem.appendChild($trackLink);
 
@@ -163,6 +187,8 @@
 					view.showLoader(false);
 				});
 			},
+
+			// Method to render the details of a track
 			details: function details(trackId) {
 				var _this3 = this;
 
