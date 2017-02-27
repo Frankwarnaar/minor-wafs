@@ -89,11 +89,8 @@
 				}
 			},
 			update(searchQuery) {
-				console.log(searchQuery);
-				let history = this.history
-				history = (history).unshift(searchQuery);
-				this.searchHistory = history
-				localStorage.setItem('searchHistory', this.searchHistory);
+				this.history.unshift(searchQuery);
+				localStorage.setItem('searchHistory', JSON.stringify(this.history));
 			}
 		},
 		// Methods to clean data
