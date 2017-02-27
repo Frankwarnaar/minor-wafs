@@ -161,33 +161,55 @@
 			},
 			details(trackId) {
 				const detailsContainer = document.getElementById('tracks-details');
+
 				view.clear(detailsContainer);
+				view.showLoader(true);
 
-				view.showLoader(true)
+				console.log(`${app.config.apiUrl}/tracks/${trackId}`);
 
+				// Get track details
 				app.handleConnection(`${app.config.apiUrl}/tracks/${trackId}`)
 					.then(details => {
 						details = cleanData.details(details);
 
 						view.showLoader(true)
 
+						const iframe = document.createElement('iframe');
+						iframe.setAttribute('src', `https://embed.spotify.com/?uri=spotify:track:${details.id}&view=coverart" frameborder="0"`);
+						iframe.classList.add('hidden');
+
+						const iframePlaceholder = document.createElement('div');
+						iframePlaceholder.classList.add('loader');
+
 						detailsContainer.innerHTML = `
 						<img src="${details.image}" alt="${details.name}"/>
 						<h2>${details.name}</h2>
 						<span>by: </span><h3>${details.artists}</h3>
-						<iframe src="https://embed.spotify.com/?uri=spotify:track:${details.id}&view=coverart" frameborder="0"></iframe>
 						`;
+
+						detailsContainer.appendChild(iframePlaceholder);
+
+						iframe.addEventListener('load', () => {
+							detailsContainer.removeChild(iframePlaceholder);
+							iframe.classList.remove('hidden');
+						});
+
+						iframePlaceholder.parentNode.insertBefore(iframe, iframePlaceholder.nextSibling);
+
 						view.showLoader(false)
 
 					}).catch(error => {
+						console.log(error);
 						detailsContainer.innerHTML = `We couldn't find any details for this track. <a href="#tracks"> Search again</a>`
 						view.showLoader(false)
 					});
 			}
 		},
+		// Clear everything inside an element
 		clear(element) {
 			element.innerHTML = '';
 		},
+		// Show loader if pararameter show is true, hide otherwise
 		showLoader(show) {
 			const $loader = document.querySelector('.loader');
 
