@@ -41,8 +41,8 @@
 			this.routes();
 		},
 		search() {
-			const form = document.getElementsByTagName('form')[0];
-			form.addEventListener('submit', (e) => {
+			const $form = document.getElementsByTagName('form')[0];
+			$form.addEventListener('submit', (e) => {
 				e.preventDefault();
 
 				const searchQuery = document.querySelector('input[type=search]').value;
@@ -111,25 +111,30 @@
 
 	const view = {
 		activatePage(route) {
-			const pages = Array.from(document.querySelectorAll('[data-page]'));
-			pages.forEach(page => {
-				if (`#${page.getAttribute('id')}` === route) {
-					page.classList.remove('hidden');
+			const $pages = Array.from(document.querySelectorAll('[data-page]'));
+			$pages.forEach($page => {
+				if (`#${$page.getAttribute('id')}` === route) {
+					$page.classList.remove('hidden');
 				} else {
-					page.classList.add('hidden');
+					$page.classList.add('hidden');
 				}
 			});
 		},
 		render: {
 			tracks(searchQuery) {
-				const tracklist = document.getElementById('tracklist');
-				const resultsSections = document.querySelector('[data-results-section]');
+				const $tracklist = document.getElementById('tracklist');
+				const $resultsSections = document.querySelector('[data-results-section]');
 
-				view.clear(tracklist);
+				$resultsSections.classList.remove('hidden');
+				view.showLoader(true)
+
+				view.clear($tracklist);
 
 				app.handleConnection(`${app.config.apiUrl}/search?q=${searchQuery}&type=track`)
 				.then(data => {
 					const tracks = cleanData.tracks(data.tracks.items);
+
+					view.showLoader(false);
 
 					if (tracks.length) {
 						tracks.map(track => {
@@ -144,24 +149,27 @@
 							};
 
 							listItem.innerHTML = itemContent(track);
-							tracklist.appendChild(listItem);
+							$tracklist.appendChild(listItem);
 						});
 					} else {
 						tracklist.innerHTML ='<p>No results found<p>';
 					}
-
-					resultsSections.classList.remove('hidden');
+				}).catch(error => {
+					tracklist.innerHTML ='<p>No results found<p>';
+					view.showLoader(false)
 				});
-
-
 			},
 			details(trackId) {
 				const detailsContainer = document.getElementById('tracks-details');
 				view.clear(detailsContainer);
 
+				view.showLoader(true)
+
 				app.handleConnection(`${app.config.apiUrl}/tracks/${trackId}`)
 					.then(details => {
 						details = cleanData.details(details);
+
+						view.showLoader(true)
 
 						detailsContainer.innerHTML = `
 						<img src="${details.image}" alt="${details.name}"/>
@@ -169,11 +177,25 @@
 						<span>by: </span><h3>${details.artists}</h3>
 						<iframe src="https://embed.spotify.com/?uri=spotify:track:${details.id}&view=coverart" frameborder="0"></iframe>
 						`;
+						view.showLoader(false)
+
+					}).catch(error => {
+						detailsContainer.innerHTML = `We couldn't find any details for this track. <a href="#tracks"> Search again</a>`
+						view.showLoader(false)
 					});
 			}
 		},
 		clear(element) {
 			element.innerHTML = '';
+		},
+		showLoader(show) {
+			const $loader = document.querySelector('.loader');
+
+			if (show) {
+				$loader.classList.remove('hidden');
+			} else {
+				$loader.classList.add('hidden');
+			}
 		}
 	};
 

@@ -42,8 +42,8 @@
 			this.routes();
 		},
 		search: function search() {
-			var form = document.getElementsByTagName('form')[0];
-			form.addEventListener('submit', function (e) {
+			var $form = document.getElementsByTagName('form')[0];
+			$form.addEventListener('submit', function (e) {
 				e.preventDefault();
 
 				var searchQuery = document.querySelector('input[type=search]').value;
@@ -114,25 +114,30 @@
 
 	var view = {
 		activatePage: function activatePage(route) {
-			var pages = Array.from(document.querySelectorAll('[data-page]'));
-			pages.forEach(function (page) {
-				if ('#' + page.getAttribute('id') === route) {
-					page.classList.remove('hidden');
+			var $pages = Array.from(document.querySelectorAll('[data-page]'));
+			$pages.forEach(function ($page) {
+				if ('#' + $page.getAttribute('id') === route) {
+					$page.classList.remove('hidden');
 				} else {
-					page.classList.add('hidden');
+					$page.classList.add('hidden');
 				}
 			});
 		},
 
 		render: {
 			tracks: function tracks(searchQuery) {
-				var tracklist = document.getElementById('tracklist');
-				var resultsSections = document.querySelector('[data-results-section]');
+				var $tracklist = document.getElementById('tracklist');
+				var $resultsSections = document.querySelector('[data-results-section]');
 
-				view.clear(tracklist);
+				$resultsSections.classList.remove('hidden');
+				view.showLoader(true);
+
+				view.clear($tracklist);
 
 				app.handleConnection(app.config.apiUrl + '/search?q=' + searchQuery + '&type=track').then(function (data) {
 					var tracks = cleanData.tracks(data.tracks.items);
+
+					view.showLoader(false);
 
 					if (tracks.length) {
 						tracks.map(function (track) {
@@ -143,28 +148,46 @@
 							};
 
 							listItem.innerHTML = itemContent(track);
-							tracklist.appendChild(listItem);
+							$tracklist.appendChild(listItem);
 						});
 					} else {
 						tracklist.innerHTML = '<p>No results found<p>';
 					}
-
-					resultsSections.classList.remove('hidden');
+				}).catch(function (error) {
+					tracklist.innerHTML = '<p>No results found<p>';
+					view.showLoader(false);
 				});
 			},
 			details: function details(trackId) {
 				var detailsContainer = document.getElementById('tracks-details');
 				view.clear(detailsContainer);
 
+				view.showLoader(true);
+
 				app.handleConnection(app.config.apiUrl + '/tracks/' + trackId).then(function (details) {
 					details = cleanData.details(details);
 
+					view.showLoader(true);
+
 					detailsContainer.innerHTML = '\n\t\t\t\t\t\t<img src="' + details.image + '" alt="' + details.name + '"/>\n\t\t\t\t\t\t<h2>' + details.name + '</h2>\n\t\t\t\t\t\t<span>by: </span><h3>' + details.artists + '</h3>\n\t\t\t\t\t\t<iframe src="https://embed.spotify.com/?uri=spotify:track:' + details.id + '&view=coverart" frameborder="0"></iframe>\n\t\t\t\t\t\t';
+					view.showLoader(false);
+				}).catch(function (error) {
+					detailsContainer.innerHTML = 'We couldn\'t find any details for this track. <a href="#tracks"> Search again</a>';
+					view.showLoader(false);
 				});
 			}
 		},
 		clear: function clear(element) {
 			element.innerHTML = '';
+		},
+		showLoader: function showLoader(show) {
+			var $loader = document.querySelector('.loader');
+
+			if (show) {
+				$loader.classList.remove('hidden');
+			} else {
+				$loader.classList.add('hidden');
+			}
 		}
 	};
 
