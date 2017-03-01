@@ -53,7 +53,6 @@
 				const searchQuery = document.querySelector('input[type=search]').value;
 				// Make sure the user has searched something. Should always be true, becuase the input is required
 				if (searchQuery.length > 0) {
-					// store.local.update(searchQuery);
 					view.render.tracks(searchQuery);
 				}
 			});
@@ -72,7 +71,12 @@
 			routie({
 				// Overview page
 				'tracks'() {
+					const searchHistory = store.local.getSearchQuery();
 					view.activatePage('#tracks');
+					if (searchHistory) {
+						view.render.tracks(searchHistory);
+						document.querySelector('input[type=search]').value = searchHistory;
+					}
 				},
 				// Detail page
 				'tracks/:trackId'(trackId) {
@@ -90,7 +94,6 @@
 	const store = {
 		init() {
 			this.local.history = [];
-			this.local.get();
 		},
 		local: {
 			setTracks() {
@@ -99,24 +102,17 @@
 			setDetails() {
 				localStorage.setItem('details', JSON.stringify(store.details));
 			},
+			setSearchQuery() {
+				localStorage.setItem('searchQuery', JSON.stringify(store.searchQuery));
+			},
+			getTracks() {
+				return JSON.parse(localStorage.getItem('tracks')) || {};
+			},
 			getDetails() {
-				return JSON.parse(localStorage.getItem('details'));
+				return JSON.parse(localStorage.getItem('details')) || [];
 			},
-			get() {
-				if (localStorage.getItem('tracks')) {
-					store.tracks = JSON.parse(localStorage.getItem('tracks'));
-				}
-
-				if (localStorage.getItem('details')) {
-					store.details = JSON.parse(localStorage.getItem('details'));
-				}
-				// if (localStorage.getItem('searchHistory')) {
-				// 	this.history = JSON.parse((localStorage.getItem('searchHistory')));
-				// }
-			},
-			update(searchQuery) {
-				this.history.unshift(searchQuery);
-				localStorage.setItem('searchHistory', JSON.stringify(this.history));
+			getSearchQuery() {
+				return JSON.parse(localStorage.getItem('searchQuery')) || '';
 			}
 		},
 		// Methods to clean data
@@ -200,19 +196,11 @@
 			tracks(searchQuery) {
 				const $tracklist = document.getElementById('tracklist');
 				const $resultsSections = document.querySelector('[data-results-section]');
+				const render = () => {
+					$resultsSections.classList.remove('hidden');
+					view.showLoader(true);
 
-				$resultsSections.classList.remove('hidden');
-				view.showLoader(true);
-
-				view.clear($tracklist);
-
-				app.handleConnection(`${app.config.apiUrl}/search?q=${searchQuery}&type=track`)
-				.then(data => {
-					store.tracks = data.tracks.items;
-					store.tracks = store.arrays.filterList(store.tracks, 'available_markets', 'NL');
-					store.tracks = store.cleanData.tracks(store.tracks).splice(0, 10);
-
-					store.local.setTracks();
+					view.clear($tracklist);
 
 					view.showLoader(false);
 
@@ -239,11 +227,29 @@
 					} else {
 						tracklist.innerHTML ='<p>No results found<p>';
 					}
-				}).catch(error => {
-					tracklist.innerHTML ='<p>No results found<p>';
-					console.log(error);
-					view.showLoader(false);
-				});
+				};
+
+				if (searchQuery === store.local.getSearchQuery()) {
+					store.tracks = store.local.getTracks();
+					render();
+				} else {
+					app.handleConnection(`${app.config.apiUrl}/search?q=${searchQuery}&type=track`)
+					.then(data => {
+						store.tracks = data.tracks.items;
+						store.tracks = store.arrays.filterList(store.tracks, 'available_markets', 'NL');
+						store.tracks = store.cleanData.tracks(store.tracks).splice(0, 10);
+
+						store.local.setTracks();
+						render();
+
+					}).catch(error => {
+						tracklist.innerHTML ='<p>No results found<p>';
+						console.log(error);
+						view.showLoader(false);
+					});
+				}
+				store.searchQuery = searchQuery;
+				store.local.setSearchQuery();
 			},
 			// Method to render the details of a track
 			details(trackId) {
@@ -265,7 +271,6 @@
 
 				view.clear($detailsContainer);
 				view.showLoader(true);
-
 
 				// Try to get details from localStorage, otherwise make an API call
 				if (trackId === store.local.getDetails().id) {

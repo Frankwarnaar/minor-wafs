@@ -56,7 +56,6 @@
 				var searchQuery = document.querySelector('input[type=search]').value;
 				// Make sure the user has searched something. Should always be true, becuase the input is required
 				if (searchQuery.length > 0) {
-					// store.local.update(searchQuery);
 					view.render.tracks(searchQuery);
 				}
 			});
@@ -76,7 +75,12 @@
 			routie({
 				// Overview page
 				'tracks': function tracks() {
+					var searchHistory = store.local.getSearchQuery();
 					view.activatePage('#tracks');
+					if (searchHistory) {
+						view.render.tracks(searchHistory);
+						document.querySelector('input[type=search]').value = searchHistory;
+					}
 				},
 
 				// Detail page
@@ -96,7 +100,6 @@
 	var store = {
 		init: function init() {
 			this.local.history = [];
-			this.local.get();
 		},
 
 		local: {
@@ -106,24 +109,17 @@
 			setDetails: function setDetails() {
 				localStorage.setItem('details', JSON.stringify(store.details));
 			},
+			setSearchQuery: function setSearchQuery() {
+				localStorage.setItem('searchQuery', JSON.stringify(store.searchQuery));
+			},
+			getTracks: function getTracks() {
+				return JSON.parse(localStorage.getItem('tracks')) || {};
+			},
 			getDetails: function getDetails() {
-				return JSON.parse(localStorage.getItem('details'));
+				return JSON.parse(localStorage.getItem('details')) || [];
 			},
-			get: function get() {
-				if (localStorage.getItem('tracks')) {
-					store.tracks = JSON.parse(localStorage.getItem('tracks'));
-				}
-
-				if (localStorage.getItem('details')) {
-					store.details = JSON.parse(localStorage.getItem('details'));
-				}
-				// if (localStorage.getItem('searchHistory')) {
-				// 	this.history = JSON.parse((localStorage.getItem('searchHistory')));
-				// }
-			},
-			update: function update(searchQuery) {
-				this.history.unshift(searchQuery);
-				localStorage.setItem('searchHistory', JSON.stringify(this.history));
+			getSearchQuery: function getSearchQuery() {
+				return JSON.parse(localStorage.getItem('searchQuery')) || '';
 			}
 		},
 		// Methods to clean data
@@ -215,18 +211,11 @@
 
 				var $tracklist = document.getElementById('tracklist');
 				var $resultsSections = document.querySelector('[data-results-section]');
+				var render = function render() {
+					$resultsSections.classList.remove('hidden');
+					view.showLoader(true);
 
-				$resultsSections.classList.remove('hidden');
-				view.showLoader(true);
-
-				view.clear($tracklist);
-
-				app.handleConnection(app.config.apiUrl + '/search?q=' + searchQuery + '&type=track').then(function (data) {
-					store.tracks = data.tracks.items;
-					store.tracks = store.arrays.filterList(store.tracks, 'available_markets', 'NL');
-					store.tracks = store.cleanData.tracks(store.tracks).splice(0, 10);
-
-					store.local.setTracks();
+					view.clear($tracklist);
 
 					view.showLoader(false);
 
@@ -250,11 +239,27 @@
 					} else {
 						tracklist.innerHTML = '<p>No results found<p>';
 					}
-				}).catch(function (error) {
-					tracklist.innerHTML = '<p>No results found<p>';
-					console.log(error);
-					view.showLoader(false);
-				});
+				};
+
+				if (searchQuery === store.local.getSearchQuery()) {
+					store.tracks = store.local.getTracks();
+					render();
+				} else {
+					app.handleConnection(app.config.apiUrl + '/search?q=' + searchQuery + '&type=track').then(function (data) {
+						store.tracks = data.tracks.items;
+						store.tracks = store.arrays.filterList(store.tracks, 'available_markets', 'NL');
+						store.tracks = store.cleanData.tracks(store.tracks).splice(0, 10);
+
+						store.local.setTracks();
+						render();
+					}).catch(function (error) {
+						tracklist.innerHTML = '<p>No results found<p>';
+						console.log(error);
+						view.showLoader(false);
+					});
+				}
+				store.searchQuery = searchQuery;
+				store.local.setSearchQuery();
 			},
 
 			// Method to render the details of a track
