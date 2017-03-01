@@ -105,9 +105,6 @@
 				},
 				searchQuery() {
 					localStorage.setItem('searchQuery', JSON.stringify(store.searchQuery));
-				},
-				sortBy() {
-					localStorage.setItem('sortBy', JSON.stringify(store.sortBy));
 				}
 			},
 			// Get values from localStorage
@@ -120,9 +117,6 @@
 				},
 				searchQuery() {
 					return JSON.parse(localStorage.getItem('searchQuery')) || '';
-				},
-				sortBy() {
-					return JSON.parse(localStorage.getItem('sortBy')) || '';
 				}
 			}
 		},
@@ -207,7 +201,7 @@
 			tracks(searchQuery) {
 				const $tracklist = document.getElementById('tracklist');
 				const $resultsSections = document.querySelector('[data-results-section]');
-				const sortBy = store.local.get.sortBy();
+				const sortBy = store.sortBy;
 				view.showLoader(true);
 
 				// Function to render a list of tracks
@@ -239,16 +233,11 @@
 							$tracklist.appendChild($listItem);
 						});
 
-						if (store.local.get.sortBy()) {
-
+						if (store.sortBy) {
+							view.reorderTracks();
 						}
 					} else {
 						tracklist.innerHTML ='<p>No results found<p>';
-					}
-
-					if (sortBy.length > 0) {
-						document.querySelector(`input[name="sort-by"][value=${sortBy}]`).setAttribute('checked', true);
-						view.reorderTracks();
 					}
 				};
 
@@ -343,8 +332,6 @@
 				const $track = document.querySelector(`[data-id="${track.id}"]`);
 				$track.style.order = i;
 			});
-
-			store.local.set.sortBy();
 		},
 		// Clear everything inside an element
 		clear(element) {
