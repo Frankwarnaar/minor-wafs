@@ -56,7 +56,7 @@
 				var searchQuery = document.querySelector('input[type=search]').value;
 				// Make sure the user has searched something. Should always be true, becuase the input is required
 				if (searchQuery.length > 0) {
-					// store.searchHistory.update(searchQuery);
+					// store.local.update(searchQuery);
 					view.render.tracks(searchQuery);
 				}
 			});
@@ -95,15 +95,31 @@
 
 	var store = {
 		init: function init() {
-			this.searchHistory.history = [];
-			// this.searchHistory.get();
+			this.local.history = [];
+			this.local.get();
 		},
 
-		searchHistory: {
+		local: {
+			setTracks: function setTracks() {
+				localStorage.setItem('tracks', JSON.stringify(store.tracks));
+			},
+			setDetails: function setDetails() {
+				localStorage.setItem('details', JSON.stringify(store.details));
+			},
+			getDetails: function getDetails() {
+				return JSON.parse(localStorage.getItem('details'));
+			},
 			get: function get() {
-				if (localStorage.getItem('searchHistory')) {
-					this.history = JSON.parse(localStorage.getItem('searchHistory'));
+				if (localStorage.getItem('tracks')) {
+					store.tracks = JSON.parse(localStorage.getItem('tracks'));
 				}
+
+				if (localStorage.getItem('details')) {
+					store.details = JSON.parse(localStorage.getItem('details'));
+				}
+				// if (localStorage.getItem('searchHistory')) {
+				// 	this.history = JSON.parse((localStorage.getItem('searchHistory')));
+				// }
 			},
 			update: function update(searchQuery) {
 				this.history.unshift(searchQuery);
@@ -210,6 +226,8 @@
 					store.tracks = store.arrays.filterList(store.tracks, 'available_markets', 'NL');
 					store.tracks = store.cleanData.tracks(store.tracks).splice(0, 10);
 
+					store.local.setTracks();
+
 					view.showLoader(false);
 
 					if (store.tracks.length) {
@@ -244,26 +262,36 @@
 				var _this3 = this;
 
 				var $detailsContainer = document.getElementById('tracks-details');
+				// Function to render the details.
+				var render = function render() {
+					view.showLoader(true);
+
+					var content = '\n\t\t\t\t\t<img src="' + store.details.image + '" alt="' + store.details.name + '"/>\n\t\t\t\t\t<h2>' + store.details.name + '</h2>\n\t\t\t\t\t<span>by: </span><h3>' + store.details.artists + '</h3>\n\t\t\t\t\t';
+
+					_this3.content('https://embed.spotify.com/?uri=spotify:track:' + store.details.id + '&view=coverart" frameborder="0"', content, $detailsContainer);
+
+					view.showLoader(false);
+				};
 
 				view.clear($detailsContainer);
 				view.showLoader(true);
 
-				// Get track details
-				app.handleConnection(app.config.apiUrl + '/tracks/' + trackId).then(function (details) {
-					view.showLoader(true);
+				// Try to get details from localStorage, otherwise make an API call
+				if (trackId === store.local.getDetails().id) {
+					store.details = store.local.getDetails();
+					render();
+				} else {
+					app.handleConnection(app.config.apiUrl + '/tracks/' + trackId).then(function (details) {
+						store.details = store.cleanData.details(details);
+						store.local.setDetails();
 
-					details = store.cleanData.details(details);
-
-					var content = '\n\t\t\t\t\t\t<img src="' + details.image + '" alt="' + details.name + '"/>\n\t\t\t\t\t\t<h2>' + details.name + '</h2>\n\t\t\t\t\t\t<span>by: </span><h3>' + details.artists + '</h3>\n\t\t\t\t\t\t';
-
-					_this3.content('https://embed.spotify.com/?uri=spotify:track:' + details.id + '&view=coverart" frameborder="0"', content, $detailsContainer);
-
-					view.showLoader(false);
-				}).catch(function (error) {
-					console.log(error);
-					$detailsContainer.innerHTML = 'We couldn\'t find any details for this track. <a href="#tracks"> Search again</a>';
-					view.showLoader(false);
-				});
+						render();
+					}).catch(function (error) {
+						console.log(error);
+						$detailsContainer.innerHTML = 'We couldn\'t find any details for this track. <a href="#tracks"> Search again</a>';
+						view.showLoader(false);
+					});
+				}
 			},
 
 			// Fill content with a loader as placeholder for the iframe while loading

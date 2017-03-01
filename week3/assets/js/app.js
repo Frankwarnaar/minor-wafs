@@ -53,7 +53,7 @@
 				const searchQuery = document.querySelector('input[type=search]').value;
 				// Make sure the user has searched something. Should always be true, becuase the input is required
 				if (searchQuery.length > 0) {
-					// store.searchHistory.update(searchQuery);
+					// store.local.update(searchQuery);
 					view.render.tracks(searchQuery);
 				}
 			});
@@ -89,14 +89,30 @@
 
 	const store = {
 		init() {
-			this.searchHistory.history = [];
-			// this.searchHistory.get();
+			this.local.history = [];
+			this.local.get();
 		},
-		searchHistory: {
+		local: {
+			setTracks() {
+				localStorage.setItem('tracks', JSON.stringify(store.tracks));
+			},
+			setDetails() {
+				localStorage.setItem('details', JSON.stringify(store.details));
+			},
+			getDetails() {
+				return JSON.parse(localStorage.getItem('details'));
+			},
 			get() {
-				if (localStorage.getItem('searchHistory')) {
-					this.history = JSON.parse((localStorage.getItem('searchHistory')));
+				if (localStorage.getItem('tracks')) {
+					store.tracks = JSON.parse(localStorage.getItem('tracks'));
 				}
+
+				if (localStorage.getItem('details')) {
+					store.details = JSON.parse(localStorage.getItem('details'));
+				}
+				// if (localStorage.getItem('searchHistory')) {
+				// 	this.history = JSON.parse((localStorage.getItem('searchHistory')));
+				// }
 			},
 			update(searchQuery) {
 				this.history.unshift(searchQuery);
@@ -196,6 +212,8 @@
 					store.tracks = store.arrays.filterList(store.tracks, 'available_markets', 'NL');
 					store.tracks = store.cleanData.tracks(store.tracks).splice(0, 10);
 
+					store.local.setTracks();
+
 					view.showLoader(false);
 
 					if (store.tracks.length) {
@@ -230,32 +248,42 @@
 			// Method to render the details of a track
 			details(trackId) {
 				const $detailsContainer = document.getElementById('tracks-details');
+				// Function to render the details.
+				const render = () => {
+					view.showLoader(true);
+
+					const content = `
+					<img src="${store.details.image}" alt="${store.details.name}"/>
+					<h2>${store.details.name}</h2>
+					<span>by: </span><h3>${store.details.artists}</h3>
+					`;
+
+					this.content(`https://embed.spotify.com/?uri=spotify:track:${store.details.id}&view=coverart" frameborder="0"`, content, $detailsContainer);
+
+					view.showLoader(false);
+				};
 
 				view.clear($detailsContainer);
 				view.showLoader(true);
 
-				// Get track details
-				app.handleConnection(`${app.config.apiUrl}/tracks/${trackId}`)
+
+				// Try to get details from localStorage, otherwise make an API call
+				if (trackId === store.local.getDetails().id) {
+					store.details = store.local.getDetails();
+					render();
+				} else {
+					app.handleConnection(`${app.config.apiUrl}/tracks/${trackId}`)
 					.then(details => {
-						view.showLoader(true);
+						store.details = store.cleanData.details(details);
+						store.local.setDetails();
 
-						details = store.cleanData.details(details);
-
-						const content = `
-						<img src="${details.image}" alt="${details.name}"/>
-						<h2>${details.name}</h2>
-						<span>by: </span><h3>${details.artists}</h3>
-						`;
-
-						this.content(`https://embed.spotify.com/?uri=spotify:track:${details.id}&view=coverart" frameborder="0"`, content, $detailsContainer);
-
-						view.showLoader(false);
-
+						render();
 					}).catch(error => {
 						console.log(error);
 						$detailsContainer.innerHTML = `We couldn't find any details for this track. <a href="#tracks"> Search again</a>`;
 						view.showLoader(false);
 					});
+				}
 			},
 			// Fill content with a loader as placeholder for the iframe while loading
 			content(iframeSrc, content, container) {
