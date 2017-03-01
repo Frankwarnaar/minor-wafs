@@ -64,9 +64,7 @@
 				$option.addEventListener('change', () => {
 					const sortBy = document.querySelector('input[name="sort-by"]:checked').value;
 					store.tracks = store.arrays.sortList(store.tracks, sortBy);
-					store.tracks.map(track => {
-						console.log(track);
-					});
+					view.reorderTracks(store.tracks);
 				});
 			});
 		},
@@ -189,19 +187,19 @@
 
 				app.handleConnection(`${app.config.apiUrl}/search?q=${searchQuery}&type=track`)
 				.then(data => {
-					let tracks = data.tracks.items;
-					tracks = store.arrays.filterList(tracks, 'available_markets', 'NL');
-					tracks = store.cleanData.tracks(tracks).splice(0, 10);
-					store.tracks = tracks;
+					store.tracks = data.tracks.items;
+					store.tracks = store.arrays.filterList(store.tracks, 'available_markets', 'NL');
+					store.tracks = store.cleanData.tracks(store.tracks).splice(0, 10);
 
 					view.showLoader(false);
 
-					if (tracks.length) {
-						tracks.map(track => {
+					if (store.tracks.length) {
+						store.tracks.map(track => {
 							const $listItem = document.createElement('li'),
 								$trackLink = document.createElement('a');
 
 							$listItem.classList.add('track');
+							$listItem.setAttribute('data-id', track.id);
 							$trackLink.setAttribute('href', `#tracks/${track.id}`);
 
 							$listItem.appendChild($trackLink);
@@ -269,6 +267,13 @@
 
 				container.appendChild($iframe);
 			}
+		},
+		// Tracks get reordered with css using flexbox's order property. This way you don't need to re-render.
+		reorderTracks(tracks) {
+			tracks.map((track, i) => {
+				const $track = document.querySelector(`[data-id="${track.id}"]`);
+				$track.style.order = i;
+			});
 		},
 		// Clear everything inside an element
 		clear(element) {

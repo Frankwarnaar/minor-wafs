@@ -377,6 +377,10 @@ form {
 .form--validate input:valid {
   background: #9bffd2;
 }
+.tracklist {
+  display: flex;
+  flex-direction: column;
+}
 .track {
   position: relative;
 }
