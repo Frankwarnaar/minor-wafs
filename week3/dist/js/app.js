@@ -5,7 +5,6 @@
 	var app = {
 		init: function init() {
 			controller.init();
-			store.init();
 		},
 
 		// Handles ajax requests as promise.
@@ -65,7 +64,8 @@
 			Array.from($sortByOptions).forEach(function ($option) {
 				$option.addEventListener('change', function () {
 					var sortBy = document.querySelector('input[name="sort-by"]:checked').value;
-					view.reorderTracks(sortBy);
+					store.sortBy = sortBy;
+					view.reorderTracks();
 				});
 			});
 		},
@@ -75,8 +75,10 @@
 			routie({
 				// Overview page
 				'tracks': function tracks() {
-					var searchHistory = store.local.getSearchQuery();
+					var searchHistory = store.local.get.searchQuery();
+
 					view.activatePage('#tracks');
+
 					if (searchHistory) {
 						view.render.tracks(searchHistory);
 						document.querySelector('input[type=search]').value = searchHistory;
@@ -98,28 +100,36 @@
 	};
 
 	var store = {
-		init: function init() {
-			this.local.history = [];
-		},
-
 		local: {
-			setTracks: function setTracks() {
-				localStorage.setItem('tracks', JSON.stringify(store.tracks));
+			// Set values to localStorage
+			set: {
+				tracks: function tracks() {
+					localStorage.setItem('tracks', JSON.stringify(store.tracks));
+				},
+				details: function details() {
+					localStorage.setItem('details', JSON.stringify(store.details));
+				},
+				searchQuery: function searchQuery() {
+					localStorage.setItem('searchQuery', JSON.stringify(store.searchQuery));
+				},
+				sortBy: function sortBy() {
+					localStorage.setItem('sortBy', JSON.stringify(store.sortBy));
+				}
 			},
-			setDetails: function setDetails() {
-				localStorage.setItem('details', JSON.stringify(store.details));
-			},
-			setSearchQuery: function setSearchQuery() {
-				localStorage.setItem('searchQuery', JSON.stringify(store.searchQuery));
-			},
-			getTracks: function getTracks() {
-				return JSON.parse(localStorage.getItem('tracks')) || {};
-			},
-			getDetails: function getDetails() {
-				return JSON.parse(localStorage.getItem('details')) || [];
-			},
-			getSearchQuery: function getSearchQuery() {
-				return JSON.parse(localStorage.getItem('searchQuery')) || '';
+			// Get values from localStorage
+			get: {
+				tracks: function tracks() {
+					return JSON.parse(localStorage.getItem('tracks')) || {};
+				},
+				details: function details() {
+					return JSON.parse(localStorage.getItem('details')) || [];
+				},
+				searchQuery: function searchQuery() {
+					return JSON.parse(localStorage.getItem('searchQuery')) || '';
+				},
+				sortBy: function sortBy() {
+					return JSON.parse(localStorage.getItem('sortBy')) || '';
+				}
 			}
 		},
 		// Methods to clean data
@@ -211,9 +221,12 @@
 
 				var $tracklist = document.getElementById('tracklist');
 				var $resultsSections = document.querySelector('[data-results-section]');
+				var sortBy = store.local.get.sortBy();
+				view.showLoader(true);
+
+				// Function to render a list of tracks
 				var render = function render() {
 					$resultsSections.classList.remove('hidden');
-					view.showLoader(true);
 
 					view.clear($tracklist);
 
@@ -236,13 +249,20 @@
 
 							$tracklist.appendChild($listItem);
 						});
+
+						if (store.local.get.sortBy()) {}
 					} else {
 						tracklist.innerHTML = '<p>No results found<p>';
 					}
+
+					if (sortBy.length > 0) {
+						document.querySelector('input[name="sort-by"][value=' + sortBy + ']').setAttribute('checked', true);
+						view.reorderTracks();
+					}
 				};
 
-				if (searchQuery === store.local.getSearchQuery()) {
-					store.tracks = store.local.getTracks();
+				if (searchQuery === store.local.get.searchQuery()) {
+					store.tracks = store.local.get.tracks();
 					render();
 				} else {
 					app.handleConnection(app.config.apiUrl + '/search?q=' + searchQuery + '&type=track').then(function (data) {
@@ -250,7 +270,7 @@
 						store.tracks = store.arrays.filterList(store.tracks, 'available_markets', 'NL');
 						store.tracks = store.cleanData.tracks(store.tracks).splice(0, 10);
 
-						store.local.setTracks();
+						store.local.set.tracks();
 						render();
 					}).catch(function (error) {
 						tracklist.innerHTML = '<p>No results found<p>';
@@ -259,7 +279,7 @@
 					});
 				}
 				store.searchQuery = searchQuery;
-				store.local.setSearchQuery();
+				store.local.set.searchQuery();
 			},
 
 			// Method to render the details of a track
@@ -282,13 +302,13 @@
 				view.showLoader(true);
 
 				// Try to get details from localStorage, otherwise make an API call
-				if (trackId === store.local.getDetails().id) {
-					store.details = store.local.getDetails();
+				if (trackId === store.local.get.details().id) {
+					store.details = store.local.get.details();
 					render();
 				} else {
 					app.handleConnection(app.config.apiUrl + '/tracks/' + trackId).then(function (details) {
 						store.details = store.cleanData.details(details);
-						store.local.setDetails();
+						store.local.set.details();
 
 						render();
 					}).catch(function (error) {
@@ -321,13 +341,15 @@
 			}
 		},
 		// Tracks get reordered with css using flexbox's order property. This way you don't need to re-render.
-		reorderTracks: function reorderTracks(sortBy) {
-			store.tracks = store.arrays.sortList(store.tracks, sortBy, sortBy === 'popularity' ? true : false);
+		reorderTracks: function reorderTracks() {
+			store.tracks = store.arrays.sortList(store.tracks, store.sortBy, store.sortBy === 'popularity' ? true : false);
 
 			store.tracks.map(function (track, i) {
 				var $track = document.querySelector('[data-id="' + track.id + '"]');
 				$track.style.order = i;
 			});
+
+			store.local.set.sortBy();
 		},
 
 		// Clear everything inside an element
