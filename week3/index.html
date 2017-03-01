@@ -25,12 +25,27 @@
 	<section id="tracks" data-page="tracks">
 		<form class="form--validate">
 			<label>
-				<h2>Search Spotify on track or artist</h2>
+				<h2>Search track or artist on Spotify</h2>
 				<input required type="search" autocomplete="off" id="search"/>
 			</label>
 		</form>
 		<div class="loader hidden"></div>
 		<section data-results-section class="hidden">
+			<form>
+				<h3>Sort by</h3>
+				<label>
+					<input type="radio" name="sort-by" value="artists"/>
+					<span>Artists</span>
+				</label>
+				<label>
+					<input type="radio" name="sort-by" value="name"/>
+					<span>Trackname</span>
+				</label>
+				<label>
+					<input type="radio" name="sort-by" value="popularity"/>
+					<span>Popularity</span>
+				</label>
+			</form>
 			<h2>Tracks</h2>
 			<ul id="tracklist"></ul>
 		</section>

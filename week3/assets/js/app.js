@@ -5,7 +5,7 @@
 	const app = {
 		init() {
 			controller.init();
-			model.init();
+			store.init();
 		},
 		// Handles ajax requests as promise.
 		handleConnection(requestUrl) {
@@ -42,6 +42,7 @@
 		init() {
 			this.search();
 			this.routes();
+			this.sortTracks();
 		},
 		// Function to handle search
 		search() {
@@ -52,9 +53,21 @@
 				const searchQuery = document.querySelector('input[type=search]').value;
 				// Make sure the user has searched something. Should always be true, becuase the input is required
 				if (searchQuery.length > 0) {
-					model.searchHistory.update(searchQuery);
+					store.searchHistory.update(searchQuery);
 					view.render.tracks(searchQuery);
 				}
+			});
+		},
+		sortTracks() {
+			const $sortByOptions = document.querySelectorAll('[name="sort-by"]');
+			$sortByOptions.forEach($option => {
+				$option.addEventListener('change', () => {
+					const sortBy = document.querySelector('input[name="sort-by"]:checked').value;
+					store.tracks = store.arrays.sortList(store.tracks, sortBy);
+					store.tracks.map(track => {
+						console.log(track);
+					});
+				});
 			});
 		},
 		// Routing
@@ -77,7 +90,7 @@
 		}
 	};
 
-	const model = {
+	const store = {
 		init() {
 			this.searchHistory.history = [];
 			this.searchHistory.get();
@@ -97,14 +110,13 @@
 		cleanData: {
 			// Make sure only the used data is returned of a list of tracks
 			tracks(tracks, key, value) {
-				tracks = this.filterArray(tracks, 'available_markets', 'NL');
-
 				return tracks.map(track => {
 					return {
 						id: track.id,
 						name: track.name,
 						artists: this.artistsToString(track.artists),
-						images: track.album.images
+						images: track.album.images,
+						popularity: track.popularity
 					};
 				});
 			},
@@ -120,12 +132,6 @@
 					})[0].url
 				};
 			},
-			// Filter an array, by by a certain property
-			filterArray(list, key, value) {
-				return list.filter(item => {
-					return item[key].includes(value);
-				});
-			},
 			// Return a string of all the artists from an array
 			artistsToString(artists) {
 				artists = artists.map(artist => {
@@ -137,6 +143,23 @@
 				});
 
 				return artists;
+			}
+		},
+		arrays: {
+			// Filter an array, by by a certain property
+			filterList(array, key, value) {
+				return array.filter(item => {
+					return item[key].includes(value);
+				});
+			},
+			// Sort array by key
+			sortList(array, key) {
+				return array.sort((a, b) => {
+					if (typeof(a[key]) === 'string') {
+						return a[key].localeCompare(b[key]);
+					}
+					return a[key] - b[key];
+				});
 			}
 		}
 	};
@@ -160,13 +183,16 @@
 				const $resultsSections = document.querySelector('[data-results-section]');
 
 				$resultsSections.classList.remove('hidden');
-				view.showLoader(true)
+				view.showLoader(true);
 
 				view.clear($tracklist);
 
 				app.handleConnection(`${app.config.apiUrl}/search?q=${searchQuery}&type=track`)
 				.then(data => {
-					const tracks = model.cleanData.tracks(data.tracks.items).splice(0, 10);
+					let tracks = data.tracks.items;
+					tracks = store.arrays.filterList(tracks, 'available_markets', 'NL');
+					tracks = store.cleanData.tracks(tracks).splice(0, 10);
+					store.tracks = tracks;
 
 					view.showLoader(false);
 
@@ -190,7 +216,7 @@
 				}).catch(error => {
 					tracklist.innerHTML ='<p>No results found<p>';
 					console.log(error);
-					view.showLoader(false)
+					view.showLoader(false);
 				});
 			},
 			// Method to render the details of a track
@@ -205,7 +231,7 @@
 					.then(details => {
 						view.showLoader(true);
 
-						details = model.cleanData.details(details);
+						details = store.cleanData.details(details);
 
 						const content = `
 						<img src="${details.image}" alt="${details.name}"/>
@@ -213,14 +239,14 @@
 						<span>by: </span><h3>${details.artists}</h3>
 						`;
 
-						this.content(`https://embed.spotify.com/?uri=spotify:track:${details.id}&view=coverart" frameborder="0"`, content, $detailsContainer)
+						this.content(`https://embed.spotify.com/?uri=spotify:track:${details.id}&view=coverart" frameborder="0"`, content, $detailsContainer);
 
-						view.showLoader(false)
+						view.showLoader(false);
 
 					}).catch(error => {
 						console.log(error);
-						$detailsContainer.innerHTML = `We couldn't find any details for this track. <a href="#tracks"> Search again</a>`
-						view.showLoader(false)
+						$detailsContainer.innerHTML = `We couldn't find any details for this track. <a href="#tracks"> Search again</a>`;
+						view.showLoader(false);
 					});
 			},
 			// Fill content with a loader as placeholder for the iframe while loading

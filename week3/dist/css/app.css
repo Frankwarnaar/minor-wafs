@@ -264,6 +264,9 @@ input:focus {
   border-bottom: 1px solid #1fbe58;
   outline: none;
 }
+input[type='radio'] {
+  float: left;
+}
 button {
   padding: 0 .5rem;
   height: 40px;
@@ -281,6 +284,17 @@ button:hover {
 label {
   font-weight: 400;
   padding: .5rem 0;
+  display: block;
+  clear: both;
+  cursor: pointer;
+}
+label input[type="radio"],
+label span {
+  float: left;
+  width: auto;
+}
+label span {
+  margin-left: .5rem;
 }
 a {
   color: #1fbe58;

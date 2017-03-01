@@ -5,7 +5,7 @@
 	var app = {
 		init: function init() {
 			controller.init();
-			model.init();
+			store.init();
 		},
 
 		// Handles ajax requests as promise.
@@ -44,6 +44,7 @@
 		init: function init() {
 			this.search();
 			this.routes();
+			this.sortTracks();
 		},
 
 		// Function to handle search
@@ -55,9 +56,21 @@
 				var searchQuery = document.querySelector('input[type=search]').value;
 				// Make sure the user has searched something. Should always be true, becuase the input is required
 				if (searchQuery.length > 0) {
-					model.searchHistory.update(searchQuery);
+					store.searchHistory.update(searchQuery);
 					view.render.tracks(searchQuery);
 				}
+			});
+		},
+		sortTracks: function sortTracks() {
+			var $sortByOptions = document.querySelectorAll('[name="sort-by"]');
+			$sortByOptions.forEach(function ($option) {
+				$option.addEventListener('change', function () {
+					var sortBy = document.querySelector('input[name="sort-by"]:checked').value;
+					store.tracks = store.arrays.sortList(store.tracks, sortBy);
+					store.tracks.map(function (track) {
+						console.log(track);
+					});
+				});
 			});
 		},
 
@@ -83,7 +96,7 @@
 		}
 	};
 
-	var model = {
+	var store = {
 		init: function init() {
 			this.searchHistory.history = [];
 			this.searchHistory.get();
@@ -106,14 +119,13 @@
 			tracks: function tracks(_tracks, key, value) {
 				var _this = this;
 
-				_tracks = this.filterArray(_tracks, 'available_markets', 'NL');
-
 				return _tracks.map(function (track) {
 					return {
 						id: track.id,
 						name: track.name,
 						artists: _this.artistsToString(track.artists),
-						images: track.album.images
+						images: track.album.images,
+						popularity: track.popularity
 					};
 				});
 			},
@@ -131,13 +143,6 @@
 				};
 			},
 
-			// Filter an array, by by a certain property
-			filterArray: function filterArray(list, key, value) {
-				return list.filter(function (item) {
-					return item[key].includes(value);
-				});
-			},
-
 			// Return a string of all the artists from an array
 			artistsToString: function artistsToString(artists) {
 				artists = artists.map(function (artist) {
@@ -149,6 +154,24 @@
 				});
 
 				return artists;
+			}
+		},
+		arrays: {
+			// Filter an array, by by a certain property
+			filterList: function filterList(array, key, value) {
+				return array.filter(function (item) {
+					return item[key].includes(value);
+				});
+			},
+
+			// Sort array by key
+			sortList: function sortList(array, key) {
+				return array.sort(function (a, b) {
+					if (typeof a[key] === 'string') {
+						return a[key].localeCompare(b[key]);
+					}
+					return a[key] - b[key];
+				});
 			}
 		}
 	};
@@ -180,7 +203,10 @@
 				view.clear($tracklist);
 
 				app.handleConnection(app.config.apiUrl + '/search?q=' + searchQuery + '&type=track').then(function (data) {
-					var tracks = model.cleanData.tracks(data.tracks.items).splice(0, 10);
+					var tracks = data.tracks.items;
+					tracks = store.arrays.filterList(tracks, 'available_markets', 'NL');
+					tracks = store.cleanData.tracks(tracks).splice(0, 10);
+					store.tracks = tracks;
 
 					view.showLoader(false);
 
@@ -221,7 +247,7 @@
 				app.handleConnection(app.config.apiUrl + '/tracks/' + trackId).then(function (details) {
 					view.showLoader(true);
 
-					details = model.cleanData.details(details);
+					details = store.cleanData.details(details);
 
 					var content = '\n\t\t\t\t\t\t<img src="' + details.image + '" alt="' + details.name + '"/>\n\t\t\t\t\t\t<h2>' + details.name + '</h2>\n\t\t\t\t\t\t<span>by: </span><h3>' + details.artists + '</h3>\n\t\t\t\t\t\t';
 
