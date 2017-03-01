@@ -1,2 +1,26 @@
-Make sure you check the code in the assets folder.
-The files in dist are compiled files, for used for production environment on github pages.
+# Spotify searcher
+
+## What did I make?
+I built a web app with which you can search tracks on Spotify. In the app, you have an overview page of the search results. Those results can be sorted by the user. The user also can navigate to a detail page of a track. Here, the user can watch the artwork and see some more details of the track.
+
+## Why did I make it?
+I built this app as an exercise for my minor Web Development for my study CMD. In this course we learned to build a web app from scratch.
+
+## How to use it?
+1. Navigate to 'Search Spotify'
+2. Here you can enter a search query. The app will make a call to the Spotify API to request tracks matching your search query
+3. The app will return tracks if there are any matches
+4. The tracks are sortable by Trackname, Artist and Popularity
+5. You can play a track by clicking on the play button
+6. You can navigate to a detail page by clicking on it
+
+## Resources
+* Gulp (to compile less to css and to transpile es6 to es5)
+* Routie (to handle routing inside the app)
+
+## Wishlist
+1. Add lyrics to the detailpage of a track
+2. Save the selected sort option in local storage
+
+## Live demo
+https://frankwarnaar.github.io/minor-wafs/week3/
