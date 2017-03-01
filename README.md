@@ -13,3 +13,8 @@ My work for wafs for my minor Everything web for CMD (HvA).
 ## Week 2
 * Production environment: https://frankwarnaar.github.io/minor-wafs/week2/
 * Code: https://github.com/Frankwarnaar/minor-wafs/tree/master/week2
+
+## week 3
+* Production environment: https://frankwarnaar.github.io/minor-wafs/week3/
+* Code: https://github.com/Frankwarnaar/minor-wafs/tree/master/week2/assets
+* Readme about product: https://github.com/Frankwarnaar/minor-wafs/tree/master/week2/readme.md
