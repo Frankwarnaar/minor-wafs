@@ -56,17 +56,17 @@
 				var searchQuery = document.querySelector('input[type=search]').value;
 				// Make sure the user has searched something. Should always be true, becuase the input is required
 				if (searchQuery.length > 0) {
-					store.searchHistory.update(searchQuery);
+					// store.searchHistory.update(searchQuery);
 					view.render.tracks(searchQuery);
 				}
 			});
 		},
 		sortTracks: function sortTracks() {
 			var $sortByOptions = document.querySelectorAll('[name="sort-by"]');
-			$sortByOptions.forEach(function ($option) {
+			Array.from($sortByOptions).forEach(function ($option) {
 				$option.addEventListener('change', function () {
 					var sortBy = document.querySelector('input[name="sort-by"]:checked').value;
-					store.tracks = store.arrays.sortList(store.tracks, sortBy);
+					store.tracks = store.arrays.sortList(store.tracks, sortBy, sortBy === 'popularity' ? true : false);
 					view.reorderTracks(store.tracks);
 				});
 			});
@@ -97,7 +97,7 @@
 	var store = {
 		init: function init() {
 			this.searchHistory.history = [];
-			this.searchHistory.get();
+			// this.searchHistory.get();
 		},
 
 		searchHistory: {
@@ -163,13 +163,19 @@
 			},
 
 			// Sort array by key
-			sortList: function sortList(array, key) {
-				return array.sort(function (a, b) {
+			sortList: function sortList(array, key, descending) {
+				array = array.sort(function (a, b) {
 					if (typeof a[key] === 'string') {
 						return a[key].localeCompare(b[key]);
 					}
 					return a[key] - b[key];
 				});
+
+				if (descending) {
+					return array.reverse();
+				}
+
+				return array;
 			}
 		}
 	};
@@ -212,13 +218,15 @@
 							var $listItem = document.createElement('li'),
 							    $trackLink = document.createElement('a');
 
+							var content = '\n\t\t\t\t\t\t\t\t<span>Popularity:</span>\n\t\t\t\t\t\t\t\t<progress value=' + track.popularity + ' max="100"></progress>\n\t\t\t\t\t\t\t';
+
 							$listItem.classList.add('track');
 							$listItem.setAttribute('data-id', track.id);
 							$trackLink.setAttribute('href', '#tracks/' + track.id);
 
 							$listItem.appendChild($trackLink);
 
-							_this2.content('https://embed.spotify.com/?uri=spotify:track:' + track.id + '&view=coverart" frameborder="0"', null, $trackLink);
+							_this2.content('https://embed.spotify.com/?uri=spotify:track:' + track.id + '&view=coverart" frameborder="0"', content, $trackLink);
 
 							$tracklist.appendChild($listItem);
 						});

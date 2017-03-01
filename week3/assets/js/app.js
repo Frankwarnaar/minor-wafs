@@ -53,17 +53,17 @@
 				const searchQuery = document.querySelector('input[type=search]').value;
 				// Make sure the user has searched something. Should always be true, becuase the input is required
 				if (searchQuery.length > 0) {
-					store.searchHistory.update(searchQuery);
+					// store.searchHistory.update(searchQuery);
 					view.render.tracks(searchQuery);
 				}
 			});
 		},
 		sortTracks() {
 			const $sortByOptions = document.querySelectorAll('[name="sort-by"]');
-			$sortByOptions.forEach($option => {
+			Array.from($sortByOptions).forEach($option => {
 				$option.addEventListener('change', () => {
 					const sortBy = document.querySelector('input[name="sort-by"]:checked').value;
-					store.tracks = store.arrays.sortList(store.tracks, sortBy);
+					store.tracks = store.arrays.sortList(store.tracks, sortBy, (sortBy === 'popularity' ? true : false));
 					view.reorderTracks(store.tracks);
 				});
 			});
@@ -91,7 +91,7 @@
 	const store = {
 		init() {
 			this.searchHistory.history = [];
-			this.searchHistory.get();
+			// this.searchHistory.get();
 		},
 		searchHistory: {
 			get() {
@@ -151,13 +151,19 @@
 				});
 			},
 			// Sort array by key
-			sortList(array, key) {
-				return array.sort((a, b) => {
+			sortList(array, key, descending) {
+				array = array.sort((a, b) => {
 					if (typeof(a[key]) === 'string') {
 						return a[key].localeCompare(b[key]);
 					}
 					return a[key] - b[key];
 				});
+
+				if (descending) {
+					return array.reverse();
+				}
+
+				return array;
 			}
 		}
 	};
@@ -198,13 +204,18 @@
 							const $listItem = document.createElement('li'),
 								$trackLink = document.createElement('a');
 
+							const content = `
+								<span>Popularity:</span>
+								<progress value=${track.popularity} max="100"></progress>
+							`;
+
 							$listItem.classList.add('track');
 							$listItem.setAttribute('data-id', track.id);
 							$trackLink.setAttribute('href', `#tracks/${track.id}`);
 
 							$listItem.appendChild($trackLink);
 
-							this.content(`https://embed.spotify.com/?uri=spotify:track:${track.id}&view=coverart" frameborder="0"`, null, $trackLink);
+							this.content(`https://embed.spotify.com/?uri=spotify:track:${track.id}&view=coverart" frameborder="0"`, content, $trackLink);
 
 							$tracklist.appendChild($listItem);
 						});

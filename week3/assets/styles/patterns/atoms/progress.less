@@ -1,0 +1,22 @@
+progress {
+	display: block; /* default: inline-block */
+	width: 100%;
+	margin: .5rem 0 1rem;
+	border: 1px solid @color-gray-clouds;
+	background: @color-lightest;
+	color: @color-primary;
+	border-radius: 0;
+	box-shadow: none;
+
+	&::-webkit-progress-bar {
+		background: @color-lightest;
+	}
+
+	&::-moz-progress-bar {
+		background: @color-primary;
+	}
+
+	&::-webkit-progress-value {
+		background: @color-primary;
+	}
+}
