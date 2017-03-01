@@ -66,8 +66,7 @@
 			Array.from($sortByOptions).forEach(function ($option) {
 				$option.addEventListener('change', function () {
 					var sortBy = document.querySelector('input[name="sort-by"]:checked').value;
-					store.tracks = store.arrays.sortList(store.tracks, sortBy, sortBy === 'popularity' ? true : false);
-					view.reorderTracks(store.tracks);
+					view.reorderTracks(sortBy);
 				});
 			});
 		},
@@ -289,8 +288,10 @@
 			}
 		},
 		// Tracks get reordered with css using flexbox's order property. This way you don't need to re-render.
-		reorderTracks: function reorderTracks(tracks) {
-			tracks.map(function (track, i) {
+		reorderTracks: function reorderTracks(sortBy) {
+			store.tracks = store.arrays.sortList(store.tracks, sortBy, sortBy === 'popularity' ? true : false);
+
+			store.tracks.map(function (track, i) {
 				var $track = document.querySelector('[data-id="' + track.id + '"]');
 				$track.style.order = i;
 			});
