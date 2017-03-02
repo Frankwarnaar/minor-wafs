@@ -24,3 +24,6 @@ I built this app as an exercise for my minor Web Development for my study CMD. I
 
 ## Live demo
 https://frankwarnaar.github.io/minor-wafs/week3/
+
+## Credits
+Credits to Nick Rutten. I got the idea for structuring my code with classes from Nick.
