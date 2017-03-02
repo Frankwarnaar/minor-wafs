@@ -30,7 +30,7 @@ gulp.task('watch:less', ['less'], function () {
 });
 
 gulp.task('watch:js', ['js'], function () {
-	return gulp.watch(config.assetsPath + '/js/*.js', ['js']);
+	return gulp.watch([`${config.assetsPath}/js/*.js`, `${config.assetsPath}/js/**/*.js`], ['js']);
 });
 
 gulp.task('watch:html', function () {
@@ -61,7 +61,7 @@ gulp.task('less', function () {
    ============================================================ */
 
 gulp.task('js', function () {
-	return gulp.src(config.assetsPath + '/js/*.js')
+	return gulp.src([`${config.assetsPath}/js/*.js`, `${config.assetsPath}/js/**/*.js`])
 		.pipe(plumber({
 			errorHandler: handleError
 		}))
