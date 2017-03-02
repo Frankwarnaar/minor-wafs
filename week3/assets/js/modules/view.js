@@ -55,7 +55,8 @@ class View {
 					app.handleConnection(`${app.config.apiUrl}/search?q=${searchQuery}&type=track`)
 					.then(data => {
 						app.store.tracks = data.tracks.items;
-						app.store.tracks = app.store.arrays.filterList(app.store.tracks, 'available_markets', 'NL');
+						// I wanted to only show tracks only available in the Netherlands, but the available markest isn't complete. So a lot of tracks weren't returned.
+						app.store.tracks = app.store.arrays.filterList(app.store.tracks, 'available_markets', 'US');
 						app.store.tracks = app.store.cleanData.tracks(app.store.tracks).splice(0, 10);
 
 						app.store.local.set.tracks();
