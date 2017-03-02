@@ -1,17 +1,18 @@
 /*jshint esversion: 6 */
-const store = (() => {
-	return {
-		local: {
+class Store {
+	constructor(app) {
+		this.app = app;
+		this.local = {
 			// Set values to localStorage
 			set: {
 				tracks() {
-					localStorage.setItem('tracks', JSON.stringify(store.tracks));
+					localStorage.setItem('tracks', JSON.stringify(app.store.tracks));
 				},
 				details() {
-					localStorage.setItem('details', JSON.stringify(store.details));
+					localStorage.setItem('details', JSON.stringify(app.store.details));
 				},
 				searchQuery() {
-					localStorage.setItem('searchQuery', JSON.stringify(store.searchQuery));
+					localStorage.setItem('searchQuery', JSON.stringify(app.store.searchQuery));
 				}
 			},
 			// Get values from localStorage
@@ -26,9 +27,9 @@ const store = (() => {
 					return JSON.parse(localStorage.getItem('searchQuery')) || '';
 				}
 			}
-		},
+		};
 		// Methods to clean data
-		cleanData: {
+		this.cleanData = {
 			// Make sure only the used data is returned of a list of tracks
 			tracks(tracks, key, value) {
 				return tracks.map(track => {
@@ -65,8 +66,9 @@ const store = (() => {
 
 				return artists;
 			}
-		},
-		arrays: {
+		};
+
+		this.arrays = {
 			// Filter an array, by by a certain property
 			filterList(array, key, value) {
 				return array.filter(item => {
@@ -88,6 +90,6 @@ const store = (() => {
 
 				return array;
 			}
-		}
-	};
-})();
+		};
+	}
+}

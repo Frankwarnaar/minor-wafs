@@ -1,36 +1,26 @@
 /*jshint esversion: 6 */
 
-const view = (() => {
-	return {
-		// Make the current page visible and all the other invisible
-		activatePage(route) {
-			const $pages = Array.from(document.querySelectorAll('[data-page]'));
-			$pages.forEach($page => {
-				if (`#${$page.getAttribute('id')}` === route) {
-					$page.classList.remove('hidden');
-				} else {
-					$page.classList.add('hidden');
-				}
-			});
-		},
-		render: {
+class View {
+	constructor(app) {
+		this.app = app;
+		this.render = {
 			// Method to render a list of tracks
 			tracks(searchQuery) {
 				const $tracklist = document.getElementById('tracklist');
 				const $resultsSections = document.querySelector('[data-results-section]');
-				const sortBy = store.sortBy;
-				view.showLoader(true);
+				const sortBy = app.store.sortBy;
+				app.view.showLoader(true);
 
 				// Function to render a list of tracks
 				const render = () => {
 					$resultsSections.classList.remove('hidden');
 
-					view.clear($tracklist);
+					app.view.clear($tracklist);
 
-					view.showLoader(false);
+					app.view.showLoader(false);
 
-					if (store.tracks.length) {
-						store.tracks.map(track => {
+					if (app.store.tracks.length) {
+						app.store.tracks.map(track => {
 							const $listItem = document.createElement('li'),
 								$trackLink = document.createElement('a');
 
@@ -45,78 +35,78 @@ const view = (() => {
 
 							$listItem.appendChild($trackLink);
 
-							this.content(`https://embed.spotify.com/?uri=spotify:track:${track.id}&view=coverart" frameborder="0"`, content, $trackLink);
+							this.content(`https://embed.spotify.com/?uri=spotify:track:${track.id}&app.view=coverart" frameborder="0"`, content, $trackLink);
 
 							$tracklist.appendChild($listItem);
 						});
 
-						if (store.sortBy) {
-							view.reorderTracks();
+						if (app.store.sortBy) {
+							app.view.reorderTracks();
 						}
 					} else {
 						tracklist.innerHTML ='<p>No results found<p>';
 					}
 				};
 
-				if (searchQuery === store.local.get.searchQuery()) {
-					store.tracks = store.local.get.tracks();
+				if (searchQuery === app.store.local.get.searchQuery()) {
+					app.store.tracks = app.store.local.get.tracks();
 					render();
 				} else {
 					app.handleConnection(`${app.config.apiUrl}/search?q=${searchQuery}&type=track`)
 					.then(data => {
-						store.tracks = data.tracks.items;
-						store.tracks = store.arrays.filterList(store.tracks, 'available_markets', 'NL');
-						store.tracks = store.cleanData.tracks(store.tracks).splice(0, 10);
+						app.store.tracks = data.tracks.items;
+						app.store.tracks = app.store.arrays.filterList(app.store.tracks, 'available_markets', 'NL');
+						app.store.tracks = app.store.cleanData.tracks(app.store.tracks).splice(0, 10);
 
-						store.local.set.tracks();
+						app.store.local.set.tracks();
 						render();
 
 					}).catch(error => {
 						tracklist.innerHTML ='<p>No results found<p>';
 						console.log(error);
-						view.showLoader(false);
+						app.view.showLoader(false);
 					});
 				}
-				store.searchQuery = searchQuery;
-				store.local.set.searchQuery();
+				app.store.searchQuery = searchQuery;
+				app.store.local.set.searchQuery();
 			},
 			// Method to render the details of a track
 			details(trackId) {
 				const $detailsContainer = document.getElementById('tracks-details');
 				// Function to render the details.
 				const render = () => {
-					view.showLoader(true);
+					app.view.showLoader(true);
 
 					const content = `
-					<img src="${store.details.image}" alt="${store.details.name}"/>
-					<h2>${store.details.name}</h2>
-					<span>by: </span><h3>${store.details.artists}</h3>
+					<img src="${app.store.details.image}" alt="${app.store.details.name}"/>
+					<h2>${app.store.details.name}</h2>
+					<span>by: </span><h3>${app.store.details.artists}</h3>
 					`;
 
-					this.content(`https://embed.spotify.com/?uri=spotify:track:${store.details.id}&view=coverart" frameborder="0"`, content, $detailsContainer);
+					this.content(`https://embed.spotify.com/?uri=spotify:track:${app.store.details.id}&app.view=coverart" frameborder="0"`, content, $detailsContainer);
 
-					view.showLoader(false);
+					app.view.showLoader(false);
 
 				};
 
-				view.clear($detailsContainer);
-				view.showLoader(true);
+				app.view.clear($detailsContainer);
+				app.view.showLoader(true);
 
 				// Try to get details from localStorage, otherwise make an API call
-				if (trackId === store.local.get.details().id) {
-					store.details = store.local.get.details();
+				if (trackId === app.store.local.get.details().id) {
+					app.store.details = app.store.local.get.details();
 					render();
 				} else {
 					app.handleConnection(`${app.config.apiUrl}/tracks/${trackId}`)
 					.then(details => {
-						store.details = store.cleanData.details(details);
-						store.local.set.details();
+						app.store.details = app.store.cleanData.details(details);
+						app.store.local.set.details();
 
 						render();
 					}).catch(error => {
 						console.log(error);
 						$detailsContainer.innerHTML = `We couldn't find any details for this track. <a href="#tracks"> Search again</a>`;
-						view.showLoader(false);
+						app.view.showLoader(false);
 					});
 				}
 			},
@@ -140,29 +130,42 @@ const view = (() => {
 
 				container.appendChild($iframe);
 			}
-		},
-		// Tracks get reordered with css using flexbox's order property. This way you don't need to re-render.
-		reorderTracks() {
-			store.tracks = store.arrays.sortList(store.tracks, store.sortBy, (store.sortBy === 'popularity' ? true : false));
+		};
+	}
 
-			store.tracks.map((track, i) => {
-				const $track = document.querySelector(`[data-id="${track.id}"]`);
-				$track.style.order = i;
-			});
-		},
-		// Clear everything inside an element
-		clear(element) {
-			element.innerHTML = '';
-		},
-		// Show loader if pararameter show is true, hide otherwise
-		showLoader(show) {
-			const $loader = document.querySelector('.loader');
-
-			if (show) {
-				$loader.classList.remove('hidden');
+	// Make the current page visible and all the other invisible
+	activatePage(route) {
+		const $pages = Array.from(document.querySelectorAll('[data-page]'));
+		$pages.forEach($page => {
+			if (`#${$page.getAttribute('id')}` === route) {
+				$page.classList.remove('hidden');
 			} else {
-				$loader.classList.add('hidden');
+				$page.classList.add('hidden');
 			}
+		});
+	}
+
+	// Tracks get reordered with css using flexbox's order property. This way you don't need to re-render.
+	reorderTracks() {
+		this.app.store.tracks = this.app.store.arrays.sortList(this.app.store.tracks, this.app.store.sortBy, (this.app.store.sortBy === 'popularity' ? true : false));
+
+		this.app.store.tracks.map((track, i) => {
+			const $track = document.querySelector(`[data-id="${track.id}"]`);
+			$track.style.order = i;
+		});
+	}
+	// Clear everything inside an element
+	clear(element) {
+		element.innerHTML = '';
+	}
+	// Show loader if pararameter show is true, hide otherwise
+	showLoader(show) {
+		const $loader = document.querySelector('.loader');
+
+		if (show) {
+			$loader.classList.remove('hidden');
+		} else {
+			$loader.classList.add('hidden');
 		}
-	};
-})();
+	}
+}

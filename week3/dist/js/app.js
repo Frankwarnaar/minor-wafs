@@ -1,6 +1,8 @@
 /*jshint esversion: 6 */
-(function (app) {
+(function () {
 	'use strict';
 
+	var app = new App();
+
 	app.init();
-})(app, controller, store, view);
+})(App, Controller, Store, View);
