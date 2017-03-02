@@ -34,10 +34,6 @@ class Controller {
 		});
 	}
 
-	tracks() {
-
-	}
-
 	// Routing
 	routes() {
 		const app = this.app;

@@ -50,9 +50,6 @@ var Controller = function () {
 				});
 			});
 		}
-	}, {
-		key: 'tracks',
-		value: function tracks() {}
 
 		// Routing
 
