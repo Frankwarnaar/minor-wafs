@@ -2,7 +2,7 @@
 (() => {
 	'use strict';
 
-	// Inspiration for classes structure by Nick Rutte
+	// Inspiration for classes structure by Nick Rutten
 	const app = new App();
 
 	app.init();
