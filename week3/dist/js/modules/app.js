@@ -19,6 +19,7 @@ var App = function () {
 		this.controller = new Controller(this);
 		this.store = new Store(this);
 		this.view = new View(this);
+		this.init();
 	}
 
 	_createClass(App, [{

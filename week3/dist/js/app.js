@@ -5,6 +5,4 @@
 	// Inspiration for classes structure by Nick Rutten
 
 	var app = new App();
-
-	app.init();
 })(App, Controller, Store, View);
