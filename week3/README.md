@@ -21,6 +21,7 @@ I built this app as an exercise for my minor Web Development for my study CMD. I
 ## Wishlist
 1. Add lyrics to the detailpage of a track
 2. Save the selected sort option in local storage
+3. Save the data of the last search queries in local storage
 
 ## Live demo
 https://frankwarnaar.github.io/minor-wafs/week3/
