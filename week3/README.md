@@ -30,7 +30,7 @@ https://frankwarnaar.github.io/minor-wafs/week3/
 Credits to Nick Rutten. I got the idea for structuring my code with classes from Nick.
 
 ## Flow
-<img src="/Frankwarnaar/minor-wafs/blob/master/IMG_20170303_093452271.jpg?raw=true" alt="IMG_20170303_093452271.jpg">
+<img src="https://raw.githubusercontent.com/Frankwarnaar/minor-wafs/master/IMG_20170303_093452271.jpg">
 
 ## Actors diagram
-https://raw.githubusercontent.com/Frankwarnaar/minor-wafs/master/Schermafbeelding%202017-03-03%20om%2009.34.07.png
+<img src="https://raw.githubusercontent.com/Frankwarnaar/minor-wafs/master/Schermafbeelding%202017-03-03%20om%2009.34.07.png">
